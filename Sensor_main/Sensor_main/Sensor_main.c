@@ -10,6 +10,7 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include "definitions.h"
+#include "FIFO_Queue.h"
 
 float accel_MG_LSB = 0.001F;
 float gravity_value = 9.821F;
@@ -78,7 +79,7 @@ int main(void)
 	//led_blinker(1);
 	i2c_write_reg(temp_addr, set_frame_rate, 0x00, 1);
 	//ctrl_reg_data = i2c_read_reg(ctrl_reg_1);
-	
+	//Sensor_Data sd = create_empty_sensor(true);
 	while(1)
 	{
 		for(int i = 0; i < 64; i++)
@@ -87,8 +88,10 @@ int main(void)
 			//_delay_ms(100);
 			temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1);
 			temperature[i] = format_temp(temp_l, temp_h);
+			//sd.ir[i] = format_temp(temp_l, temp_h);
 		}
-		led_blinker(1);
+		
+		//led_blinker(1);
  		data_1 = temperature[28];
 		data_2 = temperature[27];
 		//temp_l = i2c_read_reg(start_pixel);

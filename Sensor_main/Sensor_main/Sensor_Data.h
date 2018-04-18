@@ -1,6 +1,8 @@
 #ifndef SENSOR_DATA
 #define SENSOR_DATA
 
+#include <stdbool.h>
+
 struct Sensor_Data
 {
 	short acc_x;

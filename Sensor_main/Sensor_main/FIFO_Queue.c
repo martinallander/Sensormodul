@@ -27,14 +27,14 @@ FIFO* create_empty_FIFO()
 	return fp;
 }
 
-Sensor_Data get_front(FIFO f)
+Sensor_Data get_front(FIFO* f)
 {
-	return f.array[f.front];
+	return f->array[f->front];
 }
 
-Sensor_Data get_rear(FIFO f)
+Sensor_Data get_rear(FIFO* f)
 {
-	return f.array[f.rear];
+	return f->array[f->rear];
 }
 
 bool is_full(FIFO f)
@@ -77,7 +77,7 @@ Sensor_Data dequeue(FIFO* f)
 }
 
 
-
+/*
 int main()
 {
 	
@@ -99,4 +99,4 @@ int main()
   	free(fp);
 //	printf("Int %d", dequeue(f));
 	return 0;
-}
+}*/
