@@ -3,18 +3,19 @@
 #include <stdbool.h>
 #include "FIFO_Queue.h"
 
-Sensor_Data create_empty_sensor(bool data)
+Sensor_Data* create_empty_sensor(bool data)
 {
 	Sensor_Data sd;
-	sd.acc_x = 0;
-	sd.acc_y = 0;
-	sd.acc_z = 0;
-	sd.gyro_x = 0;
-	sd.gyro_y = 0;
-	sd.gyro_z = 0;
-	sd.tof_distance = 0;
-	sd.has_data = data;
-	return sd;
+	Sensor_Data* sd_p = malloc(sizeof(sd));
+	sd_p->acc_x = 0;
+	sd_p->acc_y = 0;
+	sd_p->acc_z = 0;
+	sd_p->gyro_x = 0;
+	sd_p->gyro_y = 0;
+	sd_p->gyro_z = 0;
+	sd_p->tof_distance = 0;
+	sd_p->has_data = data;
+	return sd_p;
 }
 
 FIFO* create_empty_FIFO()
@@ -65,7 +66,7 @@ Sensor_Data dequeue(FIFO* f)
 	if(f->length == 0)
 	{
 		fprintf(stderr, "Queue is empty, can not dequeue! \n");
-		return create_empty_sensor(false);
+		return *create_empty_sensor(false);
 	}
 	Sensor_Data data = f->array[(f->front)++];
 	if (f->front == MAX_SIZE)

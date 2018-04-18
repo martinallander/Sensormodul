@@ -20,6 +20,6 @@ Sensor_Data get_rear(FIFO*);
 bool is_full(FIFO);
 void enqueue(FIFO*, Sensor_Data);
 Sensor_Data dequeue(FIFO*);
-Sensor_Data create_empty_sensor(bool data);
+Sensor_Data* create_empty_sensor(bool data);
 
 #endif

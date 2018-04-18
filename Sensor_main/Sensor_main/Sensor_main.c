@@ -43,7 +43,7 @@ float format_temp(uint8_t low, uint8_t high)
 	return (float)merged_data*0.25;
 }
 
-void init_ir(void)
+void init_temp(void)
 {
 	i2c_write_reg(temp_addr, set_frame_rate, 0x00, 1);
 }
@@ -53,19 +53,20 @@ void init_acc(void)
 	i2c_write_reg(accel_addr, ctrl_reg_1, set_ctrl_reg_1_100, 1);
 }
 
-float* get_ir(void)
+void get_temp(Sensor_Data* sd)
 {
 	float temperature[64] = {};
+	uint8_t temp_l = i2c_read_reg(temp_addr, start_pixel);
+	uint8_t temp_h = i2c_read_reg(temp_addr, start_pixel);
 	for(int i = 0; i < 64; i++)
 	{
-		uint8_t temp_l = i2c_read_reg(temp_addr, start_pixel + 2*i);
-		uint8_t temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1);
-		temperature[i] = format_temp(temp_l, temp_h);
+		temp_l = i2c_read_reg(temp_addr, start_pixel + 2*i);
+		temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1);
+		sd->ir[i] = format_temp(temp_l, temp_h);
 	}
-	return temperature;
 }
 
-float* get_acc(void)
+float* get_acc(Sensor_Data* sd)
 {
 	float acc[3] = {};
 	uint8_t x_l = i2c_read_reg(accel_addr, acc_x_l);
@@ -80,18 +81,21 @@ float* get_acc(void)
 	uint8_t z_h = i2c_read_reg(accel_addr, acc_z_h);
 	float data_z = format_acc(z_l,z_h);
 	
-	acc[0] = data_x;
-	acc[1] = data_y;
-	acc[2] = data_z;
+	sd->acc_x = data_x;
+	sd->acc_y = data_y;
+	sd->acc_z = data_z;
 	return acc;
 }
 
 int main(void)
 {
+	float* temp;
+	Sensor_Data* sd = create_empty_sensor(true);
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
 	i2c_init();
 	sei();
+	init_temp();
 	//VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	//Status = VL53L0X_DataInit();
 	//
@@ -99,7 +103,9 @@ int main(void)
 
 	while(1)
 	{
-
+	get_temp(sd);
+	float data = sd->ir[1];
 	}
+	free(sd);
 	return 0;
 }
