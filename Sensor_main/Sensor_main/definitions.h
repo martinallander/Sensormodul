@@ -23,9 +23,12 @@
 #define acc_y_h 0x2B
 #define acc_z_l 0x2C
 #define acc_z_h 0x2D
-#define set_ctrl_reg_1_10 = 0b00100111 //10Hz
-#define set_ctrl_reg_1_50 0b01000111 //50Hz
-#define set_ctrl_reg_1_100 0b01010111 //100Hz
+#define ctrl_reg_1_10 = 0b00100111 //10Hz
+#define ctrl_reg_1_50 0b01000111 //50Hz
+#define ctrl_reg_1_100 0b01010111 //100Hz
+
+//Gyrometer registers
+#define gyro_addr 0xD6
 
 //IR cam registers
 //#define temp_addr 0b1101000
@@ -33,7 +36,7 @@
 
 #define start_pixel 0x80 //Lowbyte för första pixeln (nr 0)
 #define end_pixel 0xFE	//Lowbyte för sista pixeln (nr 63)
-#define set_frame_rate 0x02 
+#define frame_rate 0x02 
 
 #define accel_MG_LSB 0.001f
 #define gravity_value 9.821f

@@ -5,12 +5,12 @@
 
 struct Sensor_Data
 {
-	short acc_x;
-	short acc_y;
-	short acc_z;
-	short gyro_x;
-	short gyro_y;
-	short gyro_z;
+	float acc_x;
+	float acc_y;
+	float acc_z;
+	float gyro_x;
+	float gyro_y;
+	float gyro_z;
 	float tof_distance;
 	float ir[64];
 	bool has_data;

@@ -60,7 +60,6 @@ ISR(TWI_vect)
 		case TW_REP_START: //0x10
 		i2c_send_data(device_addr + I2C_READ);
 		break;
-		
 		case TW_MT_SLA_ACK: //3
 		i2c_send_data(register_addr); //load the register we want to handle
 		break;
