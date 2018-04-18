@@ -14,6 +14,9 @@
 #include "definitions.h"
 #include "FIFO_Queue.h"
 
+volatile uint8_t x_l;
+volatile uint8_t x_h;
+
 void led_blinker(uint8_t times)
 {
 	_delay_ms(500);
@@ -40,7 +43,7 @@ float format_gyro(uint8_t low, uint8_t high)
 {
 	//fattar inte varför de skiftar 4 steg åt höger...
 	int16_t merged_data = (int16_t)(low + high*256);
-	return (float)merged_data;
+	return (float)merged_data * L3GD20_SENSITIVITY_250DPS;
 }
 
 
@@ -102,9 +105,9 @@ void get_acc(Sensor_Data* sd)
 
 void get_gyro(Sensor_Data* sd)
 {
-	uint8_t x_l = i2c_read_reg(gyro_addr, acc_x_l);
+	x_l = i2c_read_reg(gyro_addr, acc_x_l);
 	_delay_ms(1);
-	uint8_t x_h = i2c_read_reg(gyro_addr, acc_x_h);
+	x_h = i2c_read_reg(gyro_addr, acc_x_h);
 	float data_x = format_gyro(x_l,x_h);
 		
 	uint8_t y_l = i2c_read_reg(gyro_addr, acc_y_l);
@@ -123,8 +126,8 @@ void get_gyro(Sensor_Data* sd)
 
 int main(void)
 {
-	volatile float accel_x;
-	volatile float accel_y;
+	volatile float gyro_x;
+	volatile float gyro_y;
 	volatile float accel_z;
 	float* temp;
 	Sensor_Data* sd = create_empty_sensor(true);
@@ -144,12 +147,12 @@ int main(void)
 	_delay_ms(10);
 	while(1)
 	{
-	//get_temp(sd);
-	get_acc(sd);
-	get_gyro(sd);
-	accel_x = sd->acc_x;
-	accel_y = sd->acc_y;
-	accel_z = sd->acc_z;
+		//get_temp(sd);
+		//get_acc(sd);
+		get_gyro(sd);
+		gyro_x = sd->gyro_x;
+		gyro_y = sd->gyro_y;
+		accel_z = sd->acc_z;
 	}
 	free(sd);
 	return 0;
