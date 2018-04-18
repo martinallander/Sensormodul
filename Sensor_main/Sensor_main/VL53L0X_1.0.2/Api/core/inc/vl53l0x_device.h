@@ -34,6 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _VL53L0X_DEVICE_H_
 #define _VL53L0X_DEVICE_H_
 
+//#include "VL53L0X_1.0.2/LinuxDriverMassMarket_1.0.6/kernel/drivers/input/misc/vl53L0X/inc/vl53l0x_types.h"
 #include "vl53l0x_types.h"
 
 

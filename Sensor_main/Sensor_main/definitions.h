@@ -10,8 +10,8 @@
 #define ERROR 1
 #define SUCCESS 0
 
-#define I2C_WRITE	0
-#define I2C_READ	1
+#define I2C_WRITE 0
+#define I2C_READ 1
 
 //Accelerometer registers
 #define accel_addr 0x32
@@ -23,9 +23,9 @@
 #define acc_y_h 0x2B
 #define acc_z_l 0x2C
 #define acc_z_h 0x2D
-#define set_ctrl_1_10 = 0b00100111 //10Hz
-#define set_ctrl_1_50 0b01000111 //50Hz
-#define set_ctrl_1_100 0b01010111 //100Hz
+#define set_ctrl_reg_1_10 = 0b00100111 //10Hz
+#define set_ctrl_reg_1_50 0b01000111 //50Hz
+#define set_ctrl_reg_1_100 0b01010111 //100Hz
 
 //IR cam registers
 //#define temp_addr 0b1101000
@@ -34,3 +34,6 @@
 #define start_pixel 0x80 //Lowbyte för första pixeln (nr 0)
 #define end_pixel 0xFE	//Lowbyte för sista pixeln (nr 63)
 #define set_frame_rate 0x02 
+
+#define accel_MG_LSB 0.001f
+#define gravity_value 9.821f

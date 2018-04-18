@@ -9,13 +9,10 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
-#include "VL53L0X_1.0.2/Api/core/inc/vl53l0x_api.h"
-#include "VL53L0X_1.0.2/Api/platform/inc/vl53l0x_platform.h"
+//#include "VL53L0X_1.0.2/Api/core/inc/vl53l0x_api.h"
+//#include "VL53L0X_1.0.2/Api/platform/inc/vl53l0x_platform.h"
 #include "definitions.h"
 #include "FIFO_Queue.h"
-
-float accel_MG_LSB = 0.001F;
-float gravity_value = 9.821F;
 
 void led_blinker(uint8_t times)
 {
@@ -46,81 +43,63 @@ float format_temp(uint8_t low, uint8_t high)
 	return (float)merged_data*0.25;
 }
 
+void init_ir(void)
+{
+	i2c_write_reg(temp_addr, set_frame_rate, 0x00, 1);
+}
+
+void init_acc(void)
+{
+	i2c_write_reg(accel_addr, ctrl_reg_1, set_ctrl_reg_1_100, 1);
+}
+
+float* get_ir(void)
+{
+	float temperature[64] = {};
+	for(int i = 0; i < 64; i++)
+	{
+		uint8_t temp_l = i2c_read_reg(temp_addr, start_pixel + 2*i);
+		uint8_t temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1);
+		temperature[i] = format_temp(temp_l, temp_h);
+	}
+	return temperature;
+}
+
+float* get_acc(void)
+{
+	float acc[3] = {};
+	uint8_t x_l = i2c_read_reg(accel_addr, acc_x_l);
+	uint8_t x_h = i2c_read_reg(accel_addr, acc_x_h);
+	float data_x = format_acc(x_l,x_h);
+		
+	uint8_t y_l = i2c_read_reg(accel_addr, acc_y_l);
+	uint8_t y_h = i2c_read_reg(accel_addr, acc_y_h);
+	float data_y = format_acc(y_l,y_h);
+		
+	uint8_t z_l = i2c_read_reg(accel_addr, acc_z_l);
+	uint8_t z_h = i2c_read_reg(accel_addr, acc_z_h);
+	float data_z = format_acc(z_l,z_h);
+	
+	acc[0] = data_x;
+	acc[1] = data_y;
+	acc[2] = data_z;
+	return acc;
+}
+
 int main(void)
 {
-	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-	volatile uint8_t x_l_value;
-	volatile uint8_t x_h_value;
-	volatile uint8_t y_l_value; 
-	volatile uint8_t y_h_value;
-	volatile uint8_t z_l_value;
-	volatile uint8_t z_h_value;
-	
-	volatile uint8_t temp_l;
-	volatile uint8_t temp_h;
-	
-	volatile uint8_t ctrl_reg_data;
-	volatile float data_x;
-	volatile float data_y;
-	volatile float data_z;
-	
-	volatile float temp_data;
-	volatile float temperature[64] = {};
-		
-	volatile float data_1;
-	volatile float data_2;
-	
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
 	i2c_init();
-	VL53L0X_DataInit();
 	sei();
-	/*-----------------------------------------------------------------
-	We maybe need to look into CTRL_REG4_A(0x23) to adjust the sensitivity
-	CTRL_REG2_A(0x21) configurate a HP-filter 
-	-----------------------------------------------------------------*/
+	//VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+	//Status = VL53L0X_DataInit();
+	//
 	//i2c_write_reg(ctrl_reg_1, set_ctrl_reg_1_100, 1);
-	//led_blinker(1);
-	i2c_write_reg(temp_addr, set_frame_rate, 0x00, 1);
-	//ctrl_reg_data = i2c_read_reg(ctrl_reg_1);
-	//Sensor_Data sd = create_empty_sensor(true);
+
 	while(1)
 	{
-		for(int i = 0; i < 64; i++)
-		{
-			temp_l = i2c_read_reg(temp_addr, start_pixel + 2*i);
-			//_delay_ms(100);
-			temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1);
-			temperature[i] = format_temp(temp_l, temp_h);
-			//sd.ir[i] = format_temp(temp_l, temp_h);
-		}
-		
-		//led_blinker(1);
- 		data_1 = temperature[28];
-		data_2 = temperature[27];
-		//temp_l = i2c_read_reg(start_pixel);
-		//_delay_ms(1);
-		//temp_h = i2c_read_reg(start_pixel + 1);
-		//temp_data = format_temp(temp_l, temp_h);
-	
-		/*
-		x_l_value = i2c_read_reg(acc_x_l_reg);
-		_delay_ms(10);
-		x_h_value = i2c_read_reg(acc_x_h_reg);
-		//_delay_ms(1000);
-		data_x = data_formater(x_l_value,x_h_value);
-		
-		y_l_value = i2c_read_reg(acc_y_l_reg);
-		_delay_ms(10);
-		y_h_value = i2c_read_reg(acc_y_h_reg);
-		data_y = data_formater(y_l_value,y_h_value);
-		
-		z_l_value = i2c_read_reg(acc_z_l_reg);
-		_delay_ms(10);
-		z_h_value = i2c_read_reg(acc_z_h_reg);
-		data_z = data_formater(z_l_value,z_h_value);
-		_delay_ms(10);
-		*/
+
 	}
 	return 0;
 }
