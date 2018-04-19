@@ -1,11 +1,13 @@
 ﻿#include <avr/io.h>
 #include <avr/interrupt.h>
+#include "definitions.h"
 
 #ifndef TIMER_H
 #define TIMER_H
 
 ISR(TIMER1_OVF_vect);
-void timer1_init(uint8_t prescaler);
-int get_overflows(void);
+void timer_1_init(float prescaler);
+void timer_1_start();
+float timer_1_get_time();
 
 #endif

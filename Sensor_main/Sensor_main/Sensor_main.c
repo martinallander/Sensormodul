@@ -177,45 +177,42 @@ void init_sensors(void)
 	init_gyro();
 }
 
-void main() {
-	volatile float time;
-	// set all pins of PORTB as output
-	DDRB = (1 << DDB0);
-	PORTB = (0 << PORTB0);
-	int count = 0;
-	int tot_count = 0;
-	timer1_init(0);
-	// toggle PORTB every 500ms (using 16Mhz clock)
-	while(1) 
-	{
-		int count = TCNT1;
-		tot_count = get_overflows() * 65535 + count;
-		time = (1.0/F_CPU) * (tot_count + 1);
-	}
-}
-/*
+
 int main(void)
 {
-	volatile float gyro_x;
-	volatile float gyro_y;
-	volatile float gyro_z;
-	volatile float accel_z;
-	Sensor_Data* sd = create_empty_sensor(true);
+	//Sensor_Data* sd = create_empty_sensor(true);
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
-	i2c_init();
+	timer_1_init(1.0);
 	sei();
-	init_sensors();
-	calibrate_gyro();
 	//VL53L0X_Error Status = VL53L0X_ERROR_NONE;
 	//Status = VL53L0X_DataInit();
+	timer_1_start();
+	volatile float diff;
+	volatile float diff2;
+	while(1)
+	{
+		float time1 = timer_1_get_time();
+		_delay_ms(1000);
+		float time2 = timer_1_get_time();
+		diff = time2 - time1;
+		
+		float time3 = timer_1_get_time(1.0);
+		_delay_ms(10);
+		float time4 = timer_1_get_time();
+		diff2 = time4 - time3;
+	}
+	
+	
+	led_blinker(1);
+	/*
 	while(1)
 	{
 		//get_temp(sd);
 		//get_acc(sd);
 		get_gyro(sd);
 	}
-	free(sd);
+	*/
+	//free(sd);
 	return 0;
 }
-*/
