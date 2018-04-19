@@ -23,14 +23,14 @@
 #define acc_y_h 0x2B
 #define acc_z_l 0x2C
 #define acc_z_h 0x2D
-#define ctrl_reg_1_10 = 0b00100111 //10Hz
-#define ctrl_reg_1_50 0b01000111 //50Hz
-#define ctrl_reg_1_100 0b01010111 //100Hz
+#define ctrl_reg_acc_10 = 0b00100111 //10Hz
+#define ctrl_reg_acc_50 0b01000111 //50Hz
+#define ctrl_reg_acc_100 0b01010111 //100Hz
 
 //Gyrometer registers
 #define gyro_addr 0xD6
 
-#define ctrl_reg_1_10 = 0x0F //default
+#define ctrl_reg_gyro_1 0x0F //default
 //Gyro sensitivities
 #define L3GD20_SENSITIVITY_250DPS (0.00875F)      // Roughly 22/256 for fixed point match
 #define L3GD20_SENSITIVITY_500DPS (0.0175F)       // Roughly 45/256
@@ -44,6 +44,7 @@
 #define start_pixel 0x80 //Lowbyte för första pixeln (nr 0)
 #define end_pixel 0xFE	//Lowbyte för sista pixeln (nr 63)
 #define frame_rate 0x02 
+#define AMG8833_RESOLUTION 0.25f
 
 #define accel_MG_LSB 0.001f
 #define gravity_value 9.821f
