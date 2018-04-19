@@ -1,18 +1,14 @@
-/*
- * Sensor_main.c
- *
- * Created: 4/12/2018 11:23:35 AM
- *  Author: maral665
- */ 
-
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+#include "timer.h"
 //#include "VL53L0X_1.0.2/Api/core/inc/vl53l0x_api.h"
 //#include "VL53L0X_1.0.2/Api/platform/inc/vl53l0x_platform.h"
 #include "definitions.h"
 #include "FIFO_Queue.h"
+//#include "SPI_slave.c"
+#include "i2c.h"
 
 float calibrated_x = 0.0;
 float calibrated_y = 0.0;
@@ -20,13 +16,13 @@ float calibrated_z = 0.0;
 
 void led_blinker(uint8_t times)
 {
-	_delay_ms(500);
+	//_delay_ms(500);
 	for (uint8_t i = 0; i < times; i++)
 	{ 
 		PORTB |= (1 << 0);
 		_delay_ms(500);
 		PORTB = (0 << 0);
-		_delay_ms(500);
+		//_delay_ms(500);
 	}
 }
 
@@ -180,6 +176,24 @@ void init_sensors(void)
 	//init_acc();
 	init_gyro();
 }
+
+void main() {
+	volatile float time;
+	// set all pins of PORTB as output
+	DDRB = (1 << DDB0);
+	PORTB = (0 << PORTB0);
+	int count = 0;
+	int tot_count = 0;
+	timer1_init(0);
+	// toggle PORTB every 500ms (using 16Mhz clock)
+	while(1) 
+	{
+		int count = TCNT1;
+		tot_count = get_overflows() * 65535 + count;
+		time = (1.0/F_CPU) * (tot_count + 1);
+	}
+}
+/*
 int main(void)
 {
 	volatile float gyro_x;
@@ -204,3 +218,4 @@ int main(void)
 	free(sd);
 	return 0;
 }
+*/

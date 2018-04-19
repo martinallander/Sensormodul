@@ -39,7 +39,8 @@ SUBDIRS :=
 C_SRCS +=  \
 ../FIFO_Queue.c \
 ../i2c.c \
-../Sensor_main.c
+../Sensor_main.c \
+../Timer.c
 
 
 PREPROCESSING_SRCS += 
@@ -51,22 +52,26 @@ ASM_SRCS +=
 OBJS +=  \
 FIFO_Queue.o \
 i2c.o \
-Sensor_main.o
+Sensor_main.o \
+Timer.o
 
 OBJS_AS_ARGS +=  \
 FIFO_Queue.o \
 i2c.o \
-Sensor_main.o
+Sensor_main.o \
+Timer.o
 
 C_DEPS +=  \
 FIFO_Queue.d \
 i2c.d \
-Sensor_main.d
+Sensor_main.d \
+Timer.d
 
 C_DEPS_AS_ARGS +=  \
 FIFO_Queue.d \
 i2c.d \
-Sensor_main.d
+Sensor_main.d \
+Timer.d
 
 OUTPUT_FILE_PATH +=Sensor_main.elf
 
@@ -82,6 +87,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

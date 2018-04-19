@@ -1,7 +1,4 @@
-#include <util/twi.h>
-#include <avr/interrupt.h>
-#include <stdbool.h>
-#include "definitions.h"
+#include "i2c.h"
 
 volatile bool i2c_done = 1;
 volatile bool write_to_slave = 1;
@@ -11,6 +8,7 @@ volatile uint8_t device_addr;
 volatile uint8_t register_addr;
 volatile int n_o_writes = 0;
 volatile int n_o_reads = 0;
+
 
 //Initializer of i2c
 void i2c_init(void)
