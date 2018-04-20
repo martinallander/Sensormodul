@@ -32,12 +32,21 @@ LIB_DEP:=
 LINKER_SCRIPT_DEP:=
 
 # Every subdirectory with source files must be described here
-SUBDIRS := 
+SUBDIRS :=  \
+../inc/ \
+../src/
 
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS +=  \
-../ToF_test.c
+../src/vl53l0x_api.c \
+../src/vl53l0x_api_calibration.c \
+../src/vl53l0x_api_core.c \
+../src/vl53l0x_api_ranging.c \
+../src/vl53l0x_api_strings.c \
+../src/vl53l0x_platform.c \
+../src/vl53l0x_platform_log.c \
+../ToF_test_main.c
 
 
 PREPROCESSING_SRCS += 
@@ -47,16 +56,44 @@ ASM_SRCS +=
 
 
 OBJS +=  \
-ToF_test.o
+src/vl53l0x_api.o \
+src/vl53l0x_api_calibration.o \
+src/vl53l0x_api_core.o \
+src/vl53l0x_api_ranging.o \
+src/vl53l0x_api_strings.o \
+src/vl53l0x_platform.o \
+src/vl53l0x_platform_log.o \
+ToF_test_main.o
 
 OBJS_AS_ARGS +=  \
-ToF_test.o
+src/vl53l0x_api.o \
+src/vl53l0x_api_calibration.o \
+src/vl53l0x_api_core.o \
+src/vl53l0x_api_ranging.o \
+src/vl53l0x_api_strings.o \
+src/vl53l0x_platform.o \
+src/vl53l0x_platform_log.o \
+ToF_test_main.o
 
 C_DEPS +=  \
-ToF_test.d
+src/vl53l0x_api.d \
+src/vl53l0x_api_calibration.d \
+src/vl53l0x_api_core.d \
+src/vl53l0x_api_ranging.d \
+src/vl53l0x_api_strings.d \
+src/vl53l0x_platform.d \
+src/vl53l0x_platform_log.d \
+ToF_test_main.d
 
 C_DEPS_AS_ARGS +=  \
-ToF_test.d
+src/vl53l0x_api.d \
+src/vl53l0x_api_calibration.d \
+src/vl53l0x_api_core.d \
+src/vl53l0x_api_ranging.d \
+src/vl53l0x_api_strings.d \
+src/vl53l0x_platform.d \
+src/vl53l0x_platform_log.d \
+ToF_test_main.d
 
 OUTPUT_FILE_PATH +=ToF_test.elf
 
@@ -74,6 +111,27 @@ LINKER_SCRIPT_DEP+=
 # AVR32/GNU C Compiler
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+src/%.o: ../src/%.c
+	@echo Building file: $<
+	@echo Invoking: AVR/GNU C Compiler : 4.8.1
+	$(QUOTE)C:\Program Files (x86)\Atmel\Atmel Toolchain\AVR8 GCC\Native\3.4.1061\avr8-gnu-toolchain\bin\avr-gcc.exe$(QUOTE)  -x c -funsigned-char -funsigned-bitfields -DDEBUG  -O1 -ffunction-sections -fdata-sections -fpack-struct -fshort-enums -mrelax -g2 -Wall -mmcu=atmega1284p -c -std=gnu99 -MD -MP -MF "$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -MT"$(@:%.o=%.o)"   -o "$@" "$<" 
+	@echo Finished building: $<
+	
 
 ./%.o: .././%.c
 	@echo Building file: $<
