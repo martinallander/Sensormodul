@@ -126,6 +126,12 @@
     <Compile Include="i2c.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Led.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Led.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Sensor_Data.h">
       <SubType>compile</SubType>
     </Compile>

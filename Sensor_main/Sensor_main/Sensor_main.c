@@ -9,6 +9,7 @@
 #include "FIFO_Queue.h"
 #include "spi_slav.h"
 #include "i2c.h"
+#include "Led.h"
 
 float calibrated_x = 0.0;
 float calibrated_y = 0.0;

@@ -67,21 +67,21 @@ void spi_test(unsigned int spi_data)
 	if (spi_data == 0xAA)
 	{
 		spi_tranceiver(0x01);
-		led_blinker(1);
+		led_blink_red(10);
 	}
 	else if (spi_data == 0x05)
 	{
 		spi_tranceiver(0x02);
-		led_blinker(2);
+		led_blink_green(10);
 	}
 	else if (spi_data == 0x0f)
 	{
 		spi_tranceiver(0x03);
-		led_blinker(3);
+		led_blink_yellow(10);
 	}
 	else
 	{
-		led_blinker(4);
+		led_blink_yellow(50);
 	}
 }
 
