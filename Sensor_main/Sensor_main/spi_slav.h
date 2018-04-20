@@ -29,14 +29,14 @@
 
 void spi_init(void);
 
+void data_direction_init();
+
 //Function to send and receive data
 unsigned char spi_tranceiver (unsigned char indata);
 
 void miso_test (uint16_t i);
 
 void mosi_test (uint16_t i);
-
-void data_direction_init();
 
 void spi_test(unsigned int spi_data);
 

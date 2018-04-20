@@ -13,7 +13,7 @@ Sensor_Data* create_empty_sensor(bool data)
 	sd_p->gyro_x = 0;
 	sd_p->gyro_y = 0;
 	sd_p->gyro_z = 0;
-	sd_p->tof_distance = 0;
+	//sd_p->tof_distance = 0;
 	sd_p->has_data = data;
 	return sd_p;
 }
