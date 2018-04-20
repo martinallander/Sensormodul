@@ -7,24 +7,14 @@
 //#include "VL53L0X_1.0.2/Api/platform/inc/vl53l0x_platform.h"
 #include "definitions.h"
 #include "FIFO_Queue.h"
-//#include "SPI_slave.c"
+#include "spi_slav.h"
 #include "i2c.h"
 
 float calibrated_x = 0.0;
 float calibrated_y = 0.0;
 float calibrated_z = 0.0;
 
-void led_blinker(uint8_t times)
-{
-	//_delay_ms(500);
-	for (uint8_t i = 0; i < times; i++)
-	{ 
-		PORTB |= (1 << 0);
-		_delay_ms(500);
-		PORTB = (0 << 0);
-		//_delay_ms(500);
-	}
-}
+float time = 0.0;
 
 float format_acc(uint8_t low, uint8_t high)
 {
@@ -121,10 +111,19 @@ void get_gyro(Sensor_Data* sd)
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
-	
 	sd->gyro_x = data_x - calibrated_x;
 	sd->gyro_y = data_y - calibrated_y;
 	sd->gyro_z = data_z - calibrated_z;
+}
+
+float get_angle(Sensor_Data* sd)
+{
+	get_gyro(sd);
+	time = timer_1_get_time();
+	sd->angle_x += (sd->gyro_x * time) * 3;
+	sd->angle_y += (sd->gyro_y * time) * 3;
+	sd->angle_z += (sd->gyro_z * time) * 3;
+	timer_1_start();
 }
 
 void get_basic_gyro(Sensor_Data* sd)
@@ -173,46 +172,32 @@ void calibrate_gyro()
 void init_sensors(void)
 {
 	//init_temp();
-	//init_acc();
+	init_acc();
 	init_gyro();
 }
 
 
 int main(void)
 {
-	//Sensor_Data* sd = create_empty_sensor(true);
+	Sensor_Data* sd = create_empty_sensor(true);
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
-	timer_1_init(1.0);
+	i2c_init();
+	spi_init();
+	data_direction_init();
+
+	led_blinker(5);
+	_delay_ms(1000);
+	timer_1_init(8.0);
 	sei();
-	//VL53L0X_Error Status = VL53L0X_ERROR_NONE;
-	//Status = VL53L0X_DataInit();
-	timer_1_start();
-	volatile float diff;
-	volatile float diff2;
+	init_sensors();
+	
 	while(1)
 	{
-		float time1 = timer_1_get_time();
-		_delay_ms(1000);
-		float time2 = timer_1_get_time();
-		diff = time2 - time1;
-		
-		float time3 = timer_1_get_time(1.0);
-		_delay_ms(10);
-		float time4 = timer_1_get_time();
-		diff2 = time4 - time3;
+		spi_test(0x00);
 	}
 	
 	
-	led_blinker(1);
-	/*
-	while(1)
-	{
-		//get_temp(sd);
-		//get_acc(sd);
-		get_gyro(sd);
-	}
-	*/
-	//free(sd);
+	free(sd);
 	return 0;
 }

@@ -8,5 +8,7 @@ i2c.c
 
 Sensor_main.c
 
+spi_slav.c
+
 Timer.c
 

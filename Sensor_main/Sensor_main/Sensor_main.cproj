@@ -132,6 +132,12 @@
     <Compile Include="Sensor_main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="spi_slav.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_slav.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Timer.c">
       <SubType>compile</SubType>
     </Compile>
