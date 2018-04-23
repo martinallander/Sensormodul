@@ -12,7 +12,7 @@
  * Author : theod
  */ 
 
-#define ERROR 0x37
+#define SPI_ERROR 0x37
 #define ACC_OK 0x59
 #define TOF_OK 0xBE
 #define IR_OK 0xA2
@@ -26,6 +26,8 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
+#include "definitions.h"
+#include "Led.h"
 
 void spi_init(void);
 
@@ -40,4 +42,3 @@ void mosi_test (uint16_t i);
 
 void spi_test(unsigned int spi_data);
 
-void led_blinker(uint8_t times);

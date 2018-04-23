@@ -15,6 +15,7 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 
+void led_blinker(uint8_t times);
 
 void led_blink_red (uint16_t i);
 
