@@ -1,8 +1,12 @@
 #include "Sensor_main.h"
 
-float calibrated_x = 0.0;
-float calibrated_y = 0.0;
-float calibrated_z = 0.0;
+float calibrated_gyro_x = 0.0;
+float calibrated_gyro_y = 0.0;
+float calibrated_gyro_z = 0.0;
+
+float calibrated_acc_x = 0.0;
+float calibrated_acc_y = 0.0;
+float calibrated_acc_z = 0.0;
 
 float time = 0.0;
 
@@ -42,9 +46,32 @@ void calibrate_gyro()
 		mean_z += sd_l->gyro_z;
 	}
 	
-	calibrated_x = mean_x / 100.0;
-	calibrated_y = mean_y / 100.0;
-	calibrated_z = mean_z / 100.0;
+	calibrated_gyro_x = mean_x / 100.0;
+	calibrated_gyro_y = mean_y / 100.0;
+	calibrated_gyro_z = mean_z / 100.0;
+	free(sd_l);
+	_delay_ms(10);
+	return;
+}
+
+void calibrate_acc()
+{
+	Sensor_Data* sd_l = create_empty_sensor(true);
+	float mean_x = 0.0;
+	float mean_y = 0.0;
+	float mean_z = 0.0;
+	
+	for(int i = 0; i < 100; i++)
+	{
+		get_uncalibrated_acc(sd_l);
+		mean_x += sd_l->acc_x;
+		mean_y += sd_l->acc_y;
+		mean_z += sd_l->acc_z;
+	}
+	
+	calibrated_acc_x = mean_x / 100.0;
+	calibrated_acc_y = mean_y / 100.0;
+	calibrated_acc_z = mean_z / 100.0;
 	free(sd_l);
 	_delay_ms(10);
 	return;
@@ -59,6 +86,7 @@ void init_sensors(void)
 	init_gyro();
 	_delay_ms(10);
 	calibrate_gyro();
+	calibrate_acc();
 	return;
 }
 
@@ -119,7 +147,7 @@ void get_temp(Sensor_Data* sd)
 	return;
 }
 
-void get_acc(Sensor_Data* sd)
+void get_uncalibrated_acc(Sensor_Data* sd)
 {
 	uint8_t x_l = i2c_read_reg(accel_addr, acc_x_l, 1);
 	_delay_ms(1);
@@ -139,6 +167,29 @@ void get_acc(Sensor_Data* sd)
 	sd->acc_x = data_x;
 	sd->acc_y = data_y;
 	sd->acc_z = data_z;
+	return;
+}
+
+void get_acc(Sensor_Data* sd)
+{
+	uint8_t x_l = i2c_read_reg(accel_addr, acc_x_l, 1);
+	_delay_ms(1);
+	uint8_t x_h = i2c_read_reg(accel_addr, acc_x_h, 1);
+	float data_x = format_acc(x_l, x_h);
+	
+	uint8_t y_l = i2c_read_reg(accel_addr, acc_y_l, 1);
+	_delay_ms(1);
+	uint8_t y_h = i2c_read_reg(accel_addr, acc_y_h, 1);
+	float data_y = format_acc(y_l, y_h);
+	
+	uint8_t z_l = i2c_read_reg(accel_addr, acc_z_l, 1);
+	_delay_ms(1);
+	uint8_t z_h = i2c_read_reg(accel_addr, acc_z_h, 1);
+	float data_z = format_acc(z_l, z_h);
+	
+	sd->acc_x = data_x - calibrated_acc_x;
+	sd->acc_y = data_y - calibrated_acc_y;
+	sd->acc_z = data_z - calibrated_acc_z;
 	return;
 }
 
@@ -181,9 +232,9 @@ void get_gyro(Sensor_Data* sd)
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
-	sd->gyro_x = data_x - calibrated_x;
-	sd->gyro_y = data_y - calibrated_y;
-	sd->gyro_z = data_z - calibrated_z;
+	sd->gyro_x = data_x - calibrated_gyro_x;
+	sd->gyro_y = data_y - calibrated_gyro_y;
+	sd->gyro_z = data_z - calibrated_gyro_z;
 	return;
 }
 
@@ -198,6 +249,18 @@ void get_angle(Sensor_Data* sd)
 	return;
 }
 
+void get_distance(Sensor_Data* sd)
+{
+	get_acc(sd);
+	time = timer_1_get_time();
+	float t_squared = pow(time, 2);
+	sd->distance_x += (sd->acc_x * t_squared);
+	sd->distance_y += (sd->acc_y * t_squared);
+	sd->distance_z += (sd->acc_z * t_squared);
+	timer_1_start();
+	return;
+}
+
 /******************************************************************
 ****************************** MAIN *******************************
 ******************************************************************/
@@ -205,13 +268,15 @@ void get_angle(Sensor_Data* sd)
 int main(void)
 {
 	Sensor_Data* sd = create_empty_sensor(true);
-	volatile float watch = 0.0;
+	volatile float watch_x = 0.0;
+	volatile float watch_y = 0.0;
 	initialize_all();
 	
 	while(1)
 	{
-		get_angle(sd);
-		watch = sd->angle_x;
+		get_distance(sd);
+		watch_x = (sd->distance_x) * 100;
+		watch_y = (sd->distance_y) * 100;
 	}
 	
 	free(sd);

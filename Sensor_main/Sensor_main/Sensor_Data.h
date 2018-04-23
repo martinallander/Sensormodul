@@ -14,6 +14,9 @@ struct Sensor_Data
 	float angle_x;
 	float angle_y;
 	float angle_z;
+	float distance_x;
+	float distance_y;
+	float distance_z;
 	//float tof_distance;
 	float ir[64];
 	bool has_data;
