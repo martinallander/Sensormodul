@@ -14,6 +14,7 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "definitions.h"
 #include "FIFO_Queue.h"
 #include "spi_slav.h"
