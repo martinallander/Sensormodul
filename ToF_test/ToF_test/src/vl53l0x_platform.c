@@ -258,18 +258,79 @@ VL53L0X_Error  VL53L0X_RdDWord(VL53L0X_DEV Dev, uint8_t index, uint32_t *data){
     return Status;
 }
 
-#define VL53L0X_POLLINGDELAY_LOOPNB  250
-VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev){
-    VL53L0X_Error status = VL53L0X_ERROR_NONE;
-    LOG_FUNCTION_START("");
+//#define VL53L0X_POLLINGDELAY_LOOPNB  250
+//VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev){
+    //VL53L0X_Error status = VL53L0X_ERROR_NONE;
+    //LOG_FUNCTION_START("");
+//
+    //const DWORD cTimeout_ms = 1;
+    //HANDLE hEvent = CreateEvent(0, TRUE, FALSE, 0);
+    //if(hEvent != NULL)
+    //{
+        //WaitForSingleObject(hEvent,cTimeout_ms);
+    //}
+//
+    //LOG_FUNCTION_END(status);
+    //return status;
+//}
 
-    const DWORD cTimeout_ms = 1;
-    HANDLE hEvent = CreateEvent(0, TRUE, FALSE, 0);
-    if(hEvent != NULL)
+VL53L0X_Error start_single_measurment(VL53L0X_DEV Dev)
+{
+	VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+	VL53L0X_DeviceModes DeviceMode;
+	/* This function will do a complete single ranging
+     * Here we fix the mode! */
+    Status = VL53L0X_SetDeviceMode(Dev, VL53L0X_DEVICEMODE_SINGLE_RANGING);
+    /* Get Current DeviceMode */
+    if (Status == VL53L0X_ERROR_NONE)
+        Status = VL53L0X_GetDeviceMode(Dev, &DeviceMode);
+		
+		
+		/* Start immediately to run a single ranging measurement in case of
+     * single ranging or single histogram */
+    if (Status == VL53L0X_ERROR_NONE
+        && DeviceMode == VL53L0X_DEVICEMODE_SINGLE_RANGING)
+        Status = VL53L0X_StartMeasurement(Dev);
+
+    return Status;
+}
+
+/**
+ * polls for data ready and reads data if ready
+ * returns 0 if data was read, 100 if still busy and negative on error
+ */
+VL53L0X_Error pollAndReadMeasurement(VL53L0X_DEV Dev,
+    VL53L0X_RangingMeasurementData_t *pRangingMeasurementData)
+{
+    VL53L0X_Error Status = VL53L0X_ERROR_NONE;
+    if (Status == VL53L0X_ERROR_NONE)
     {
-        WaitForSingleObject(hEvent,cTimeout_ms);
-    }
+        uint8_t NewDataReady = 0;
 
-    LOG_FUNCTION_END(status);
-    return status;
+ 
+
+        Status = VL53L0X_GetMeasurementDataReady(Dev, &NewDataReady);
+
+ 
+
+        if ((Status == VL53L0X_ERROR_NONE) && (NewDataReady == 0))
+        {
+            Status = 100;   // still measuring
+        }
+    }
+    if (Status == VL53L0X_ERROR_NONE)
+    {
+        // measurement done, read out values
+        PALDevDataSet(Dev, PalState, VL53L0X_STATE_IDLE);
+        Status = VL53L0X_GetRangingMeasurementData(Dev, pRangingMeasurementData);
+
+ 
+
+        if (Status == VL53L0X_ERROR_NONE)
+            Status = VL53L0X_ClearInterruptMask(Dev, 0);
+
+ 
+
+    }
+    return Status;
 }

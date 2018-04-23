@@ -18,16 +18,20 @@
  */
 
 
-#include <windows.h>
+/*************************************************************************
+******************* Kommenterade ut "windows.h" **************************
+**************************************************************************/
+
+//#include <windows.h>
 #include <stdio.h>    // sprintf(), vsnprintf(), printf()
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
-#include "vl53l0x_i2c_platform.h"
-#include "vl53l0x_def.h"
-#include "vl53l0x_platform_log.h"
+#include "../inc/vl53l0x_i2c_platform.h"
+#include "../inc/vl53l0x_def.h"
+#include "../inc/vl53l0x_platform_log.h"
 
 #define trace_print(level, ...) trace_print_module_function(TRACE_MODULE_PLATFORM, level, TRACE_FUNCTION_NONE, ##__VA_ARGS__)
 #define trace_i2c(...) trace_print_module_function(TRACE_MODULE_NONE, TRACE_LEVEL_NONE, TRACE_FUNCTION_I2C, ##__VA_ARGS__)

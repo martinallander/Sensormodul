@@ -30,6 +30,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _VL53L0X_PLATFORM_H_
 #define _VL53L0X_PLATFORM_H_
 
+//#include "extra win def/comms_platform.h"
+
 #include "vl53l0x_def.h"
 #include "vl53l0x_platform_log.h"
 #include "vl53l0x_i2c_platform.h"
@@ -57,10 +59,9 @@ extern "C" {
  */
 typedef struct {
     VL53L0X_DevData_t Data;               /*!< embed ST Ewok Dev  data as "Data"*/
-
     /*!< user specific field */
-    uint8_t   I2cDevAddr;                /*!< i2c device address user specific field */
-    uint8_t   comms_type;                /*!< Type of comms : VL53L0X_COMMS_I2C or VL53L0X_COMMS_SPI */
+    uint8_t I2cDevAddr;               /*!< i2c device address user specific field */
+    uint8_t comms_type;                /*!< Type of comms : VL53L0X_COMMS_I2C or VL53L0X_COMMS_SPI */
     uint16_t  comms_speed_khz;           /*!< Comms speed [kHz] : typically 400kHz for I2C           */
 
 } VL53L0X_Dev_t;
@@ -228,6 +229,19 @@ VL53L0X_Error VL53L0X_UpdateByte(VL53L0X_DEV Dev, uint8_t index, uint8_t AndData
  * @return  "Other error code"    See ::VL53L0X_Error
  */
 VL53L0X_Error VL53L0X_PollingDelay(VL53L0X_DEV Dev); /* usually best implemented as a real function */
+
+
+/*
+ * Egna funktioner. Hämtade från forumet
+ *
+ *
+ */
+/*
+VL53L0X_Error start_single_measurment(VL53L0X_DEV Dev);
+
+VL53L0X_Error pollAndReadMeasurement(VL53L0X_DEV Dev,
+	 VL53L0X_RangingMeasurementData_t *pRangingMeasurementData);
+	 */
 
 /** @} end of VL53L0X_platform_group */
 

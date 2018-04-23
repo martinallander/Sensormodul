@@ -98,6 +98,15 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="inc\extra win def\ccsdk_types.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\extra win def\comms_platform.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="inc\extra win def\SERIAL_COMMS.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="inc\vl53l0x_api.h">
       <SubType>compile</SubType>
     </Compile>
@@ -164,6 +173,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="inc\" />
+    <Folder Include="inc\extra win def\" />
     <Folder Include="src\" />
   </ItemGroup>
   <ItemGroup>
