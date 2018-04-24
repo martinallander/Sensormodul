@@ -3,6 +3,12 @@
 
 #include <stdbool.h>
 
+#define PACKET_SIZE (sizeof(Sensor_Data))
+#define IR_SIZE 256
+#define ANGLE_SIZE 12
+#define DISTANCE_SIZE 12
+#define ACC_SIZE 12
+
 struct Sensor_Data
 {
 	float acc[3];
@@ -11,14 +17,11 @@ struct Sensor_Data
 	float distance[3];
 	float ir[64];
 	bool has_data;
-	//#define IR_SIZE sizeof(ir[64])
+	bool has_ir;
+	bool has_angle;
+	bool has_acc;
+	bool has_distance;
 }; typedef struct Sensor_Data Sensor_Data;
-
-#define PACKET_SIZE (sizeof(Sensor_Data))
-#define IR_SIZE 256
-#define ANGLE_SIZE 12
-#define DISTANCE_SIZE 12
-#define ACC_SIZE 12
 
 union SPI_packet
 {

@@ -302,72 +302,120 @@ void send_data(Sensor_Data* sd)
 	switch(data)
 	{
 		case IR_DATA_REQUEST :
-			spi_tranceiver(IR_OK);
-			IR_packet ir_packet;
-			for(int i = 0; i < 63; i++)
+			if(sd->has_ir)
 			{
-				ir_packet.ir[i] = sd->ir[i];
+				spi_tranceiver(IR_OK);
+				IR_packet ir_packet;
+				for(int i = 0; i < 63; i++)
+				{
+					ir_packet.ir[i] = sd->ir[i];
+				}
+				for (int i = 0; i < IR_SIZE; i++)
+				{
+					spi_tranceiver(ir_packet.packet[i]);
+				}
 			}
-			for (int i = 0; i < IR_SIZE; i++)
-			{
-				spi_tranceiver(ir_packet.packet[i]);
-			}
+			return;
 			break;
 		
 		case ANGLE_DATA_REQUEST :
-			spi_tranceiver(ANGLE_OK);
-			Angle_packet angle_packet;
-			for(int i = 0; i < 2; i++)
+			if(sd->has_angle)
 			{
-				angle_packet.angle[i] = sd->angle[i];
+				spi_tranceiver(ANGLE_OK);
+				Angle_packet angle_packet;
+				for(int i = 0; i < 2; i++)
+				{
+					angle_packet.angle[i] = sd->angle[i];
+				}
+				for (int i = 0; i < ANGLE_SIZE; i++)
+				{
+					spi_tranceiver(angle_packet.packet[i]);
+				}
+				for(int i = 0; i < 2; i++)
+				{
+					sd->angle[i] = 0;
+				}
 			}
-			for (int i = 0; i < ANGLE_SIZE; i++)
-			{
-				spi_tranceiver(angle_packet.packet[i]);
-			}
-			for(int i = 0; i < 2; i++)
-			{
-				sd->angle[i] = 0;  
-			}
+			return;
 			break;
 		
 		case DISTANCE_DATA_REQUEST :
-			spi_tranceiver(DISTANCE_OK);
-			Distance_packet distance_packet;
-			for(int i = 0; i < 2; i++)
+			if(sd->has_distance)
 			{
-				distance_packet.distance[i] = sd->distance[i];
+				spi_tranceiver(DISTANCE_OK);
+				Distance_packet distance_packet;
+				for(int i = 0; i < 2; i++)
+				{
+					distance_packet.distance[i] = sd->distance[i];
+				}
+				for (int i = 0; i < DISTANCE_SIZE; i++)
+				{
+					spi_tranceiver(distance_packet.packet[i]);
+				}
 			}
-			for (int i = 0; i < DISTANCE_SIZE; i++)
-			{
-				spi_tranceiver(distance_packet.packet[i]);
-			}
+			return;
 			break;
 		
 		case ACC_DATA_REQUEST :
-			spi_tranceiver(ACC_OK);
-			Acc_packet acc_packet;
-			for(int i = 0; i < 2; i++)
+			if(sd->has_acc)
 			{
-				acc_packet.acc[i] = sd->acc[i];
+				spi_tranceiver(ACC_OK);
+				Acc_packet acc_packet;
+				for(int i = 0; i < 2; i++)
+				{
+					acc_packet.acc[i] = sd->acc[i];
+				}
+				for (int i = 0; i < ACC_SIZE; i++)
+				{
+					spi_tranceiver(acc_packet.packet[i]);
+				}
 			}
-			for (int i = 0; i < ACC_SIZE; i++)
-			{
-				spi_tranceiver(acc_packet.packet[i]);
-			}
+			return;
 			break;
 			
 		case ALL_DATA_REQUEST :
-			spi_tranceiver(ALL_OK);
-			SPI_packet spi_packet;
-			spi_packet.sd = *sd;
-			for (int i = 0; i < PACKET_SIZE; i++)
+			if(sd->has_data)
 			{
-				spi_tranceiver(spi_packet.packet[i]);
+				spi_tranceiver(ALL_OK);
+				SPI_packet spi_packet;
+				spi_packet.sd = *sd;
+				for (int i = 0; i < PACKET_SIZE; i++)
+				{
+					spi_tranceiver(spi_packet.packet[i]);
+				}
 			}
+			return;
+			break;
+			
+		default :
+			spi_tranceiver(SPI_ERROR);
+			return;
 			break;
 	}
+	spi_tranceiver(DATA_ERROR);
 	return;
+}
+
+/* 
+	********* AVBROTT **********
+	Kan finnas flera ISR som använder olika avbrottsvektorer.
+	SPI_STC_vect: SPI Serial Transfer Complete 
+	INT0_vect: External interrupt
+	
+	Externa avbrott:
+	EICRA – External Interrupt Control Register A
+	EIFR –External Interrupt Flag Register
+	EIMSK – External Interrupt Mask Register
+	ISC - Interrupt Sense Control (1,1 -> rising edge)
+	
+	EIMSK = 1<<INT0;                // Enable INT0
+	EIFR = (1 << INT0);				// Clear flag
+	MCUCR = 1<<ISC01 | 1<<ISC00;	// Trigger INT0 on rising edge
+*/
+
+ISR(INT0_vect)  
+{
+	
 }
 
 /******************************************************************

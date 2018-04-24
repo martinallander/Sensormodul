@@ -21,6 +21,9 @@ Sensor_Data* create_empty_sensor(bool data)
 	sd_p->distance[2] = 0;
 	//sd_p->tof_distance = 0;
 	sd_p->has_data = data;
+	sd_p->has_ir = data;
+	sd_p->has_angle = data;
+	sd_p->has_acc = data;
 	return sd_p;
 }
 

@@ -12,8 +12,6 @@
  * Author : theod
  */ 
 
-#define SPI_ERROR 0x37
-
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <util/delay.h>
