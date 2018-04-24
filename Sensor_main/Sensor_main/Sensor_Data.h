@@ -5,29 +5,49 @@
 
 struct Sensor_Data
 {
-	float acc_x;
-	float acc_y;
-	float acc_z;
-	float gyro_x;
-	float gyro_y;
-	float gyro_z;
-	float angle_x;
-	float angle_y;
-	float angle_z;
-	float distance_x;
-	float distance_y;
-	float distance_z;
-	//float tof_distance;
+	float acc[3];
+	float gyro[3];
+	float angle[3];
+	float distance[3];
 	float ir[64];
 	bool has_data;
+	//#define IR_SIZE sizeof(ir[64])
 }; typedef struct Sensor_Data Sensor_Data;
 
 #define PACKET_SIZE (sizeof(Sensor_Data))
+#define IR_SIZE 256
+#define ANGLE_SIZE 12
+#define DISTANCE_SIZE 12
+#define ACC_SIZE 12
 
-union SPI_Packet
+union SPI_packet
 {
 	Sensor_Data sd;
 	unsigned char packet[PACKET_SIZE];
-}; typedef union SPI_Packet SPI_Packet;
+}; typedef union SPI_packet SPI_packet;
+
+union IR_packet
+{
+	float ir[64];
+	unsigned char packet[IR_SIZE];
+}; typedef union IR_packet IR_packet;
+
+union Angle_packet
+{
+	float angle[3];
+	unsigned char packet[ANGLE_SIZE];
+}; typedef union Angle_packet Angle_packet;
+
+union Distance_packet
+{
+	float distance[3];
+	unsigned char packet[DISTANCE_SIZE];
+}; typedef union Distance_packet Distance_packet;
+
+union Acc_packet
+{
+	float acc[3];
+	unsigned char packet[ACC_SIZE];
+}; typedef union Acc_packet Acc_packet;
 
 #endif

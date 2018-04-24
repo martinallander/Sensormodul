@@ -48,3 +48,16 @@
 
 #define accel_MG_LSB 0.001f
 #define gravity_value 9.821f
+
+#define IR_DATA_REQUEST 0x00
+#define ANGLE_DATA_REQUEST 0x01
+#define DISTANCE_DATA_REQUEST 0x02
+#define ACC_DATA_REQUEST 0x03
+#define ALL_DATA_REQUEST 0x04
+
+#define DATA_ERROR 0x37
+#define ACC_OK 0x59
+#define IR_OK 0xD3
+#define ANGLE_OK 0xA0
+#define DISTANCE_OK 0xBC
+#define ALL_OK 0xC8

@@ -52,5 +52,7 @@ void init_sensors(void);
 
 void initialize_all(void);
 
+void send_data(Sensor_Data* sd);
+
 
 #endif /* SENSOR_MAIN_H_ */

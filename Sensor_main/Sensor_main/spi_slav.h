@@ -13,15 +13,6 @@
  */ 
 
 #define SPI_ERROR 0x37
-#define ACC_OK 0x59
-#define TOF_OK 0xBE
-#define IR_OK 0xA2
-#define MIC_OK 0xE6
-
-#define ACCSIZE 12
-#define TOFSIZE 2
-#define IRSIZE 64
-
 
 #include <avr/io.h>
 #include <avr/interrupt.h>

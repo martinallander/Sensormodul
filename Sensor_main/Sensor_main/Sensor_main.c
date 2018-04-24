@@ -58,9 +58,9 @@ void calibrate_gyro()
 	for(int i = 0; i < 100; i++)
 	{
 		get_uncalibrated_gyro(sd_l);
-		mean_x += sd_l->gyro_x;
-		mean_y += sd_l->gyro_y;
-		mean_z += sd_l->gyro_z;
+		mean_x += sd_l->gyro[0];
+		mean_y += sd_l->gyro[1];
+		mean_z += sd_l->gyro[2];
 	}
 	
 	calibrated_gyro_x = mean_x / 100.0;
@@ -82,9 +82,9 @@ void calibrate_acc()
 	for(int i = 0; i < 100; i++)
 	{
 		get_uncalibrated_acc(sd_l);
-		mean_x += sd_l->acc_x;
-		mean_y += sd_l->acc_y;
-		mean_z += sd_l->acc_z;
+		mean_x += sd_l->acc[0];
+		mean_y += sd_l->acc[1];
+		mean_z += sd_l->acc[2];
 	}
 	
 	calibrated_acc_x = mean_x / 100.0;
@@ -182,9 +182,9 @@ void get_uncalibrated_acc(Sensor_Data* sd)
 	uint8_t z_h = i2c_read_reg(accel_addr, acc_z_h, 1);
 	float data_z = format_acc(z_l, z_h);
 	
-	sd->acc_x = data_x;
-	sd->acc_y = data_y;
-	sd->acc_z = data_z;
+	sd->acc[0] = data_x;
+	sd->acc[1] = data_y;
+	sd->acc[2] = data_z;
 	return;
 }
 
@@ -205,9 +205,9 @@ void get_acc(Sensor_Data* sd)
 	uint8_t z_h = i2c_read_reg(accel_addr, acc_z_h, 1);
 	float data_z = format_acc(z_l, z_h);
 	
-	sd->acc_x = -(data_x - calibrated_acc_x);
-	sd->acc_y = -(data_y - calibrated_acc_y);
-	sd->acc_z = -(data_z - calibrated_acc_z);
+	sd->acc[0] = -(data_x - calibrated_acc_x);
+	sd->acc[1] = -(data_y - calibrated_acc_y);
+	sd->acc[2] = -(data_z - calibrated_acc_z);
 	return;
 }
 
@@ -229,9 +229,9 @@ void get_uncalibrated_gyro(Sensor_Data* sd)
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
 	
-	sd->gyro_x = data_x;
-	sd->gyro_y = data_y;
-	sd->gyro_z = data_z;
+	sd->gyro[0] = data_x;
+	sd->gyro[1] = data_y;
+	sd->gyro[2] = data_z;
 	return;
 }
 
@@ -251,9 +251,9 @@ void get_gyro(Sensor_Data* sd)
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
-	sd->gyro_x = data_x - calibrated_gyro_x;
-	sd->gyro_y = data_y - calibrated_gyro_y;
-	sd->gyro_z = data_z - calibrated_gyro_z;
+	sd->gyro[0] = data_x - calibrated_gyro_x;
+	sd->gyro[1] = data_y - calibrated_gyro_y;
+	sd->gyro[2] = data_z - calibrated_gyro_z;
 	return;
 }
 
@@ -263,9 +263,9 @@ void get_angle(Sensor_Data* sd)
 	get_gyro(sd);
 	gyro_time += timer_1_get_time();
 	
-	sd->angle_x += (sd->gyro_x * gyro_time) * 3.0;
-	sd->angle_y += (sd->gyro_y * gyro_time) * 3.0;
-	sd->angle_z += (sd->gyro_z * gyro_time) * 3.0;
+	sd->angle[0] += (sd->gyro[0] * gyro_time) * 3.0;
+	sd->angle[1] += (sd->gyro[1] * gyro_time) * 3.0;
+	sd->angle[2] += (sd->gyro[2] * gyro_time) * 3.0;
 	
 	acc_time += gyro_time;
 	gyro_time = 0.0;
@@ -280,9 +280,9 @@ void get_distance(Sensor_Data* sd)
 	acc_time += timer_1_get_time();
 	
 	float t_squared = pow(acc_time, 2);
-	sd->distance_x += (sd->acc_x * t_squared)/2.0;
-	sd->distance_y += (sd->acc_y * t_squared)/2.0;
-	sd->distance_z += (sd->acc_z * t_squared)/2.0;
+	sd->distance[0] += 100.0 * (sd->acc[0] * t_squared)/2.0;
+	sd->distance[1] += 100.0 * (sd->acc[1] * t_squared)/2.0;
+	sd->distance[2] += 100.0 * (sd->acc[2] * t_squared)/2.0;
 	
 	gyro_time += acc_time;
 	acc_time = 0.0;
@@ -294,20 +294,80 @@ void get_distance(Sensor_Data* sd)
 ************************** SPI FUNCTIONS **************************
 ******************************************************************/
 
-void send_sensor_data(Sensor_Data* sd)
+void send_data(Sensor_Data* sd)
 {
 	unsigned char data = 0;
-	SPI_Packet sp;
-	sp.sd = *sd;
-	data = spi_tranceiver(data);
-	if (data == 0xAA)
+	data = spi_tranceiver(0x00);
+	
+	switch(data)
 	{
-		led_blink_green(1);
+		case IR_DATA_REQUEST :
+			spi_tranceiver(IR_OK);
+			IR_packet ir_packet;
+			for(int i = 0; i < 63; i++)
+			{
+				ir_packet.ir[i] = sd->ir[i];
+			}
+			for (int i = 0; i < IR_SIZE; i++)
+			{
+				spi_tranceiver(ir_packet.packet[i]);
+			}
+			break;
+		
+		case ANGLE_DATA_REQUEST :
+			spi_tranceiver(ANGLE_OK);
+			Angle_packet angle_packet;
+			for(int i = 0; i < 2; i++)
+			{
+				angle_packet.angle[i] = sd->angle[i];
+			}
+			for (int i = 0; i < ANGLE_SIZE; i++)
+			{
+				spi_tranceiver(angle_packet.packet[i]);
+			}
+			for(int i = 0; i < 2; i++)
+			{
+				sd->angle[i] = 0;  
+			}
+			break;
+		
+		case DISTANCE_DATA_REQUEST :
+			spi_tranceiver(DISTANCE_OK);
+			Distance_packet distance_packet;
+			for(int i = 0; i < 2; i++)
+			{
+				distance_packet.distance[i] = sd->distance[i];
+			}
+			for (int i = 0; i < DISTANCE_SIZE; i++)
+			{
+				spi_tranceiver(distance_packet.packet[i]);
+			}
+			break;
+		
+		case ACC_DATA_REQUEST :
+			spi_tranceiver(ACC_OK);
+			Acc_packet acc_packet;
+			for(int i = 0; i < 2; i++)
+			{
+				acc_packet.acc[i] = sd->acc[i];
+			}
+			for (int i = 0; i < ACC_SIZE; i++)
+			{
+				spi_tranceiver(acc_packet.packet[i]);
+			}
+			break;
+			
+		case ALL_DATA_REQUEST :
+			spi_tranceiver(ALL_OK);
+			SPI_packet spi_packet;
+			spi_packet.sd = *sd;
+			for (int i = 0; i < PACKET_SIZE; i++)
+			{
+				spi_tranceiver(spi_packet.packet[i]);
+			}
+			break;
 	}
-	for (int i = 0; i < PACKET_SIZE; i++)
-	{
-		spi_tranceiver(sp.packet[i]);
-	}
+	return;
 }
 
 /******************************************************************
@@ -317,21 +377,12 @@ void send_sensor_data(Sensor_Data* sd)
 int main(void)
 {
 	Sensor_Data* sd = create_empty_sensor(true);
-	volatile float watch_x = 0.0;
-	volatile float watch_y = 0.0;
-	volatile float watch_z = 0.0;
 	initialize_all();
 	
 	while(1)
 	{
-		//get_distance(sd);
-		//watch_x = (sd->distance_x) * 100;
-		//watch_y = (sd->distance_y) * 100;
-		get_distance(sd);
 		get_angle(sd);
-		watch_x = sd->distance_x * 100.0;
-		watch_y = sd->distance_y * 100.0;
-		watch_z = sd->acc_z;
+		get_temp(sd);
 	}
 	
 	free(sd);
@@ -340,16 +391,6 @@ int main(void)
 
 
 /*
-sd->acc_x = 1.0;
-sd->acc_y = 2.0;
-sd->acc_z = 3.0;
-sd->gyro_x = 4.0;
-sd->gyro_y = 5.0;
-sd->gyro_z = 6.0;
-sd->angle_x = 7.0;
-sd->angle_y = 8.0;
-sd->angle_z = 9.0;
-//float tof_distance;
 unsigned char data = 0;
 for (int i = 0; i < 64; i++)
 {
