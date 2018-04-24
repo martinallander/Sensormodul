@@ -31,8 +31,7 @@
 
 VL53L0X_Dev_t Our_Dev;
 
-VL53L0X_Dev_t *pOur_Dev = &Our_Dev;
-pOur_Dev->I2cDevAddr = VL53L0X_I2C_ADDR;
+Our_Dev.I2cDevAddr = VL53L0X_I2C_ADDR;
 
 
 //PALDevDataSet(our_VL53L0X, I2cDevAddr, 0x52)
