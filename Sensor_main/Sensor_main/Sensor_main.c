@@ -19,6 +19,8 @@ float calibrated_acc_z = 0.0;
 float gyro_time = 0.0;
 float acc_time = 0.0;
 
+Sensor_Data* sd;
+
 /******************************************************************
 ********************** INITIALIZER FUNCTIONS **********************
 ******************************************************************/
@@ -304,7 +306,8 @@ void send_data(Sensor_Data* sd)
 		case IR_DATA_REQUEST :
 			if(sd->has_ir)
 			{
-				spi_tranceiver(IR_OK);
+				spi_tranceiver(DATA_OK);
+				spi_tranceiver(IR_SIZE);
 				IR_packet ir_packet;
 				for(int i = 0; i < 63; i++)
 				{
@@ -321,8 +324,10 @@ void send_data(Sensor_Data* sd)
 		case ANGLE_DATA_REQUEST :
 			if(sd->has_angle)
 			{
-				spi_tranceiver(ANGLE_OK);
+				spi_tranceiver(DATA_OK);
+				spi_tranceiver(ANGLE_SIZE);
 				Angle_packet angle_packet;
+				
 				for(int i = 0; i < 2; i++)
 				{
 					angle_packet.angle[i] = sd->angle[i];
@@ -342,8 +347,10 @@ void send_data(Sensor_Data* sd)
 		case DISTANCE_DATA_REQUEST :
 			if(sd->has_distance)
 			{
-				spi_tranceiver(DISTANCE_OK);
+				spi_tranceiver(DATA_OK);
+				spi_tranceiver(DISTANCE_SIZE);
 				Distance_packet distance_packet;
+				
 				for(int i = 0; i < 2; i++)
 				{
 					distance_packet.distance[i] = sd->distance[i];
@@ -359,8 +366,10 @@ void send_data(Sensor_Data* sd)
 		case ACC_DATA_REQUEST :
 			if(sd->has_acc)
 			{
-				spi_tranceiver(ACC_OK);
+				spi_tranceiver(DATA_OK);
+				spi_tranceiver(ACC_SIZE);
 				Acc_packet acc_packet;
+				
 				for(int i = 0; i < 2; i++)
 				{
 					acc_packet.acc[i] = sd->acc[i];
@@ -376,7 +385,8 @@ void send_data(Sensor_Data* sd)
 		case ALL_DATA_REQUEST :
 			if(sd->has_data)
 			{
-				spi_tranceiver(ALL_OK);
+				spi_tranceiver(DATA_OK);
+				spi_tranceiver(PACKET_SIZE);
 				SPI_packet spi_packet;
 				spi_packet.sd = *sd;
 				for (int i = 0; i < PACKET_SIZE; i++)
@@ -388,7 +398,7 @@ void send_data(Sensor_Data* sd)
 			break;
 			
 		default :
-			spi_tranceiver(SPI_ERROR);
+			spi_tranceiver(DATA_ERROR);
 			return;
 			break;
 	}
@@ -413,9 +423,10 @@ void send_data(Sensor_Data* sd)
 	MCUCR = 1<<ISC01 | 1<<ISC00;	// Trigger INT0 on rising edge
 */
 
-ISR(INT0_vect)  
+ISR(SPI_STC_vect)  
 {
-	
+	led_blink_green(1);
+	send_data(sd);
 }
 
 /******************************************************************
@@ -424,15 +435,13 @@ ISR(INT0_vect)
 
 int main(void)
 {
-	Sensor_Data* sd = create_empty_sensor(true);
+	sd = create_empty_sensor(true);
 	initialize_all();
-	
-	while(1)
+	_delay_ms(1000);
+	while(1) 
 	{
-		get_angle(sd);
-		get_temp(sd);
+		led_blink_red(1);
 	}
-	
 	free(sd);
 	return 0;
 }

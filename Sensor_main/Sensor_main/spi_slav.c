@@ -9,14 +9,15 @@
 
 void spi_init(void)
 {
-	SPCR=(1<<SPE);                                //Enable SPI
+	SPCR |= (1 << SPIE);  
+	SPCR |= (1 << SPE);  //Enable SPI
 }
 
 //Function to send and receive data
 unsigned char spi_tranceiver (unsigned char indata)
 {	
 	SPDR = indata;								 //Load data into buffer
-	while(!(SPSR & (1<<SPIF) ));                  //Wait until transmission complete
+	while(!(SPSR & (1 << SPIF)));                  //Wait until transmission complete
 	return SPDR;                                 //Return received data
 }
 

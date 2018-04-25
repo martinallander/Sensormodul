@@ -48,16 +48,12 @@
 #define AMG8833_RESOLUTION 0.25f
 
 //****************** SPI ******************
-#define IR_DATA_REQUEST 0x00
-#define ANGLE_DATA_REQUEST 0x01
-#define DISTANCE_DATA_REQUEST 0x02
-#define ACC_DATA_REQUEST 0x03
-#define ALL_DATA_REQUEST 0x04
 
-#define SPI_ERROR 0x37
-#define DATA_ERROR 0x37
-#define ACC_OK 0x59
-#define IR_OK 0xD3
-#define ANGLE_OK 0xA0
-#define DISTANCE_OK 0xBC
-#define ALL_OK 0xC8
+#define ALL_DATA_REQUEST 0x01
+#define ACC_DATA_REQUEST 0x02
+#define ANGLE_DATA_REQUEST 0x03
+#define DISTANCE_DATA_REQUEST 0x04
+#define IR_DATA_REQUEST 0x05
+
+#define DATA_ERROR 0x10
+#define DATA_OK 0x11
