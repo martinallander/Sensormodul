@@ -3,6 +3,7 @@
 #endif
 
 #include "Sensor_main.h"
+#include <stdbool.h>
 
 /* Kalibreringsvärden som räknas ut initialt för att sedan
 subtraheras från sensordatan */
@@ -18,6 +19,8 @@ float calibrated_acc_z = 0.0;
  och sträcka från sensordatan */
 float gyro_time = 0.0;
 float acc_time = 0.0;
+
+bool data_sending = false;
 
 Sensor_Data* sd;
 
@@ -100,7 +103,7 @@ void calibrate_acc()
 //Initierar och kalibrerar alla sensorer
 void init_sensors(void)
 {
-	//init_temp();
+	init_temp();
 	init_acc();
 	init_gyro();
 	calibrate_gyro();
@@ -299,8 +302,8 @@ void get_distance(Sensor_Data* sd)
 void send_data(Sensor_Data* sd)
 {
 	unsigned char data = 0;
-	data = spi_tranceiver(0x00);
-	
+	data = SPDR;
+	//led_blink_yellow(data);
 	switch(data)
 	{
 		case IR_DATA_REQUEST :
@@ -309,7 +312,7 @@ void send_data(Sensor_Data* sd)
 				spi_tranceiver(DATA_OK);
 				spi_tranceiver(IR_SIZE);
 				IR_packet ir_packet;
-				for(int i = 0; i < 63; i++)
+				for(int i = 0; i < 64; i++)
 				{
 					ir_packet.ir[i] = sd->ir[i];
 				}
@@ -318,17 +321,18 @@ void send_data(Sensor_Data* sd)
 					spi_tranceiver(ir_packet.packet[i]);
 				}
 			}
-			return;
 			break;
 		
 		case ANGLE_DATA_REQUEST :
 			if(sd->has_angle)
 			{
+				
 				spi_tranceiver(DATA_OK);
+				
 				spi_tranceiver(ANGLE_SIZE);
 				Angle_packet angle_packet;
 				
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 3; i++)
 				{
 					angle_packet.angle[i] = sd->angle[i];
 				}
@@ -336,12 +340,11 @@ void send_data(Sensor_Data* sd)
 				{
 					spi_tranceiver(angle_packet.packet[i]);
 				}
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 3; i++)
 				{
 					sd->angle[i] = 0;
 				}
 			}
-			return;
 			break;
 		
 		case DISTANCE_DATA_REQUEST :
@@ -351,7 +354,7 @@ void send_data(Sensor_Data* sd)
 				spi_tranceiver(DISTANCE_SIZE);
 				Distance_packet distance_packet;
 				
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 3; i++)
 				{
 					distance_packet.distance[i] = sd->distance[i];
 				}
@@ -360,7 +363,6 @@ void send_data(Sensor_Data* sd)
 					spi_tranceiver(distance_packet.packet[i]);
 				}
 			}
-			return;
 			break;
 		
 		case ACC_DATA_REQUEST :
@@ -370,7 +372,7 @@ void send_data(Sensor_Data* sd)
 				spi_tranceiver(ACC_SIZE);
 				Acc_packet acc_packet;
 				
-				for(int i = 0; i < 2; i++)
+				for(int i = 0; i < 3; i++)
 				{
 					acc_packet.acc[i] = sd->acc[i];
 				}
@@ -379,7 +381,6 @@ void send_data(Sensor_Data* sd)
 					spi_tranceiver(acc_packet.packet[i]);
 				}
 			}
-			return;
 			break;
 			
 		case ALL_DATA_REQUEST :
@@ -394,15 +395,14 @@ void send_data(Sensor_Data* sd)
 					spi_tranceiver(spi_packet.packet[i]);
 				}
 			}
-			return;
 			break;
 			
 		default :
+			led_blink_green(1);
 			spi_tranceiver(DATA_ERROR);
-			return;
 			break;
 	}
-	spi_tranceiver(DATA_ERROR);
+	data_sending = false;
 	return;
 }
 
@@ -424,9 +424,13 @@ void send_data(Sensor_Data* sd)
 */
 
 ISR(SPI_STC_vect)  
-{
-	led_blink_green(1);
-	send_data(sd);
+{  
+	//led_blink_green(1);
+	if (!(data_sending))
+	{
+		data_sending = true;
+		send_data(sd);
+	}
 }
 
 /******************************************************************
@@ -440,7 +444,7 @@ int main(void)
 	_delay_ms(1000);
 	while(1) 
 	{
-		led_blink_red(1);
+		get_temp(sd);
 	}
 	free(sd);
 	return 0;

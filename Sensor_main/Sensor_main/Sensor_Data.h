@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 #define PACKET_SIZE (sizeof(Sensor_Data))
-#define IR_SIZE 256
+#define IR_SIZE 255
 #define ANGLE_SIZE 12
 #define DISTANCE_SIZE 12
 #define ACC_SIZE 12
