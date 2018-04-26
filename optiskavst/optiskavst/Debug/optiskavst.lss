@@ -3,29 +3,29 @@ optiskavst.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000016  00800100  0000032e  000003c2  2**0
+  0 .data         00000016  00800100  00000324  000003b8  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000032e  00000000  00000000  00000094  2**1
+  1 .text         00000324  00000000  00000000  00000094  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000004  00800116  00800116  000003d8  2**0
+  2 .bss          00000006  00800116  00800116  000003ce  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  000003d8  2**0
+  3 .comment      00000030  00000000  00000000  000003ce  2**0
                   CONTENTS, READONLY
-  4 .debug_aranges 00000080  00000000  00000000  00000408  2**0
+  4 .debug_aranges 00000080  00000000  00000000  000003fe  2**0
                   CONTENTS, READONLY, DEBUGGING
-  5 .debug_info   0000094c  00000000  00000000  00000488  2**0
+  5 .debug_info   00000940  00000000  00000000  0000047e  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_abbrev 000003cb  00000000  00000000  00000dd4  2**0
+  6 .debug_abbrev 000003c4  00000000  00000000  00000dbe  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_line   000004cd  00000000  00000000  0000119f  2**0
+  7 .debug_line   000004cb  00000000  00000000  00001182  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_frame  00000134  00000000  00000000  0000166c  2**2
+  8 .debug_frame  00000134  00000000  00000000  00001650  2**2
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_str    00000242  00000000  00000000  000017a0  2**0
+  9 .debug_str    00000242  00000000  00000000  00001784  2**0
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_loc    0000033f  00000000  00000000  000019e2  2**0
+ 10 .debug_loc    0000033f  00000000  00000000  000019c6  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_ranges 00000060  00000000  00000000  00001d21  2**0
+ 11 .debug_ranges 00000060  00000000  00000000  00001d05  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -79,7 +79,7 @@ Disassembly of section .text:
   5a:	00 00       	nop
   5c:	34 c0       	rjmp	.+104    	; 0xc6 <__bad_interrupt>
   5e:	00 00       	nop
-  60:	eb c0       	rjmp	.+470    	; 0x238 <__vector_24>
+  60:	ee c0       	rjmp	.+476    	; 0x23e <__vector_24>
   62:	00 00       	nop
   64:	30 c0       	rjmp	.+96     	; 0xc6 <__bad_interrupt>
   66:	00 00       	nop
@@ -114,7 +114,7 @@ Disassembly of section .text:
   98:	11 e0       	ldi	r17, 0x01	; 1
   9a:	a0 e0       	ldi	r26, 0x00	; 0
   9c:	b1 e0       	ldi	r27, 0x01	; 1
-  9e:	ee e2       	ldi	r30, 0x2E	; 46
+  9e:	e4 e2       	ldi	r30, 0x24	; 36
   a0:	f3 e0       	ldi	r31, 0x03	; 3
   a2:	00 e0       	ldi	r16, 0x00	; 0
   a4:	0b bf       	out	0x3b, r16	; 59
@@ -135,11 +135,11 @@ Disassembly of section .text:
   ba:	1d 92       	st	X+, r1
 
 000000bc <.do_clear_bss_start>:
-  bc:	aa 31       	cpi	r26, 0x1A	; 26
+  bc:	ac 31       	cpi	r26, 0x1C	; 28
   be:	b2 07       	cpc	r27, r18
   c0:	e1 f7       	brne	.-8      	; 0xba <.do_clear_bss_loop>
-  c2:	a1 d0       	rcall	.+322    	; 0x206 <main>
-  c4:	32 c1       	rjmp	.+612    	; 0x32a <_exit>
+  c2:	a6 d0       	rcall	.+332    	; 0x210 <main>
+  c4:	2d c1       	rjmp	.+602    	; 0x320 <_exit>
 
 000000c6 <__bad_interrupt>:
   c6:	9c cf       	rjmp	.-200    	; 0x0 <__vectors>
@@ -311,241 +311,243 @@ void LCD_Clear()
  1da:	76 cf       	rjmp	.-276    	; 0xc8 <LCD_Command>
  1dc:	08 95       	ret
 
-000001de <Write_data_to_LCD>:
+000001de <init_AD_conv>:
+	enable ADC, Auto Trigger och sätter Free Running mode,
+	 avbrott och sätter prescaler bits.
+	 Osäker på ADATE
+	 !!! Tar bort ADATE !!!
+	*/
+	DDRA = 0x00;
+ 1de:	11 b8       	out	0x01, r1	; 1
+	ADCSRA = (1<<ADEN) |(1 << ADATE) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
+ 1e0:	8b ea       	ldi	r24, 0xAB	; 171
+ 1e2:	80 93 7a 00 	sts	0x007A, r24
+ 1e6:	08 95       	ret
+
+000001e8 <Write_data_to_LCD>:
 	//MCUCR = 1<<SM0 | 1<<ISC01 | 1<<ISC00;
 	return 0;
 }
 
 void Write_data_to_LCD(uint16_t data)
 {
- 1de:	cf 93       	push	r28
- 1e0:	df 93       	push	r29
- 1e2:	ec 01       	movw	r28, r24
+ 1e8:	cf 93       	push	r28
+ 1ea:	df 93       	push	r29
+ 1ec:	ec 01       	movw	r28, r24
 	//char buffer [16];
+	//cli();
 	LCD_Clear();
- 1e4:	f1 df       	rcall	.-30     	; 0x1c8 <LCD_Clear>
+ 1ee:	ec df       	rcall	.-40     	; 0x1c8 <LCD_Clear>
 	LCD_String("Distance:");
- 1e6:	80 e0       	ldi	r24, 0x00	; 0
- 1e8:	91 e0       	ldi	r25, 0x01	; 1
- 1ea:	e0 df       	rcall	.-64     	; 0x1ac <LCD_String>
+ 1f0:	80 e0       	ldi	r24, 0x00	; 0
+ 1f2:	91 e0       	ldi	r25, 0x01	; 1
+ 1f4:	db df       	rcall	.-74     	; 0x1ac <LCD_String>
 	LCD_Command(0x14);
- 1ec:	84 e1       	ldi	r24, 0x14	; 20
- 1ee:	6c df       	rcall	.-296    	; 0xc8 <LCD_Command>
+ 1f6:	84 e1       	ldi	r24, 0x14	; 20
+ 1f8:	67 df       	rcall	.-306    	; 0xc8 <LCD_Command>
     } else if (__radix < 2 || __radix > 36) {
 	*__s = 0;
 	return __s;
     } else {
 	extern char *__itoa_ncheck (int, char *, unsigned char);
 	return __itoa_ncheck (__val, __s, __radix);
- 1f0:	4a e0       	ldi	r20, 0x0A	; 10
- 1f2:	66 e1       	ldi	r22, 0x16	; 22
- 1f4:	71 e0       	ldi	r23, 0x01	; 1
- 1f6:	ce 01       	movw	r24, r28
- 1f8:	65 d0       	rcall	.+202    	; 0x2c4 <__itoa_ncheck>
-	//char lo = data & 0xFF;
-	//char hi = data >> 8;
-	//buffer[0] = lo;
-	//buffer[1] = hi;
+ 1fa:	4a e0       	ldi	r20, 0x0A	; 10
+ 1fc:	66 e1       	ldi	r22, 0x16	; 22
+ 1fe:	71 e0       	ldi	r23, 0x01	; 1
+ 200:	ce 01       	movw	r24, r28
+ 202:	5b d0       	rcall	.+182    	; 0x2ba <__itoa_ncheck>
+	
+	NYTT MÖJLIGT PROBLEM: Write_data_to_LCD skriver ut en extra "siffra" när
+	t.ex. buffer[3] = 0....
+	*/
 	itoa (data, buffer, 10);
 	LCD_String(buffer);
- 1fa:	86 e1       	ldi	r24, 0x16	; 22
- 1fc:	91 e0       	ldi	r25, 0x01	; 1
- 1fe:	d6 df       	rcall	.-84     	; 0x1ac <LCD_String>
+ 204:	86 e1       	ldi	r24, 0x16	; 22
+ 206:	91 e0       	ldi	r25, 0x01	; 1
+ 208:	d1 df       	rcall	.-94     	; 0x1ac <LCD_String>
+	//sei();
 	return 0;
 }
- 200:	df 91       	pop	r29
- 202:	cf 91       	pop	r28
- 204:	08 95       	ret
+ 20a:	df 91       	pop	r29
+ 20c:	cf 91       	pop	r28
+ 20e:	08 95       	ret
 
-00000206 <main>:
+00000210 <main>:
 int main(void)
 {
 	//volatile uint16_t data_out;
 	//volatile char buffer [16];
 	int a = 0;
 	LCD_Init();
- 206:	b2 df       	rcall	.-156    	; 0x16c <LCD_Init>
+ 210:	ad df       	rcall	.-166    	; 0x16c <LCD_Init>
 	LCD_Clear();
- 208:	df df       	rcall	.-66     	; 0x1c8 <LCD_Clear>
+ 212:	da df       	rcall	.-76     	; 0x1c8 <LCD_Clear>
 	LCD_String("Device's On");
- 20a:	8a e0       	ldi	r24, 0x0A	; 10
- 20c:	91 e0       	ldi	r25, 0x01	; 1
- 20e:	ce df       	rcall	.-100    	; 0x1ac <LCD_String>
- 210:	2f ef       	ldi	r18, 0xFF	; 255
- 212:	87 ea       	ldi	r24, 0xA7	; 167
- 214:	91 e6       	ldi	r25, 0x61	; 97
- 216:	21 50       	subi	r18, 0x01	; 1
- 218:	80 40       	sbci	r24, 0x00	; 0
- 21a:	90 40       	sbci	r25, 0x00	; 0
- 21c:	e1 f7       	brne	.-8      	; 0x216 <main+0x10>
- 21e:	00 c0       	rjmp	.+0      	; 0x220 <main+0x1a>
- 220:	00 00       	nop
-	/*
-	enable ADC, Auto Trigger och sätter Free Running mode,
-	 avbrott och sätter prescaler bits.
-	 Osäker på ADATE
-	*/
-	ADCSRA = 1<<ADEN | 1<<ADATE | 1<<ADIE | 1<<ADPS1 | 1<<ADPS0;
- 222:	8b ea       	ldi	r24, 0xAB	; 171
- 224:	80 93 7a 00 	sts	0x007A, r24
-	LCD_Init();
-	LCD_Clear();
-	LCD_String("Device's On");
+ 214:	8a e0       	ldi	r24, 0x0A	; 10
+ 216:	91 e0       	ldi	r25, 0x01	; 1
+ 218:	c9 df       	rcall	.-110    	; 0x1ac <LCD_String>
+ 21a:	2f ef       	ldi	r18, 0xFF	; 255
+ 21c:	87 ea       	ldi	r24, 0xA7	; 167
+ 21e:	91 e6       	ldi	r25, 0x61	; 97
+ 220:	21 50       	subi	r18, 0x01	; 1
+ 222:	80 40       	sbci	r24, 0x00	; 0
+ 224:	90 40       	sbci	r25, 0x00	; 0
+ 226:	e1 f7       	brne	.-8      	; 0x220 <main+0x10>
+ 228:	00 c0       	rjmp	.+0      	; 0x22a <main+0x1a>
+ 22a:	00 00       	nop
 	_delay_ms(2000);
 	init_AD_conv();
+ 22c:	d8 df       	rcall	.-80     	; 0x1de <init_AD_conv>
 	LCD_Clear();
- 228:	cf df       	rcall	.-98     	; 0x1c8 <LCD_Clear>
+ 22e:	cc df       	rcall	.-104    	; 0x1c8 <LCD_Clear>
 	sei();
- 22a:	78 94       	sei
-	ADCSRA |= (1 << ADSC) | (1 << ADIF);
- 22c:	ea e7       	ldi	r30, 0x7A	; 122
- 22e:	f0 e0       	ldi	r31, 0x00	; 0
- 230:	80 81       	ld	r24, Z
- 232:	80 65       	ori	r24, 0x50	; 80
- 234:	80 83       	st	Z, r24
- 236:	ff cf       	rjmp	.-2      	; 0x236 <main+0x30>
+ 230:	78 94       	sei
+	ADCSRA |= (1 << ADSC);
+ 232:	ea e7       	ldi	r30, 0x7A	; 122
+ 234:	f0 e0       	ldi	r31, 0x00	; 0
+ 236:	80 81       	ld	r24, Z
+ 238:	80 64       	ori	r24, 0x40	; 64
+ 23a:	80 83       	st	Z, r24
+ 23c:	ff cf       	rjmp	.-2      	; 0x23c <main+0x2c>
 
-00000238 <__vector_24>:
+0000023e <__vector_24>:
 
 /*
 		Det som typ återstår är förstå hur Free Running mode fungerar
 */
 ISR(ADC_vect)
 {
- 238:	1f 92       	push	r1
- 23a:	0f 92       	push	r0
- 23c:	0f b6       	in	r0, 0x3f	; 63
- 23e:	0f 92       	push	r0
- 240:	11 24       	eor	r1, r1
- 242:	0b b6       	in	r0, 0x3b	; 59
+ 23e:	1f 92       	push	r1
+ 240:	0f 92       	push	r0
+ 242:	0f b6       	in	r0, 0x3f	; 63
  244:	0f 92       	push	r0
- 246:	2f 93       	push	r18
- 248:	3f 93       	push	r19
- 24a:	4f 93       	push	r20
- 24c:	5f 93       	push	r21
- 24e:	6f 93       	push	r22
- 250:	7f 93       	push	r23
- 252:	8f 93       	push	r24
- 254:	9f 93       	push	r25
- 256:	af 93       	push	r26
- 258:	bf 93       	push	r27
- 25a:	ef 93       	push	r30
- 25c:	ff 93       	push	r31
+ 246:	11 24       	eor	r1, r1
+ 248:	0b b6       	in	r0, 0x3b	; 59
+ 24a:	0f 92       	push	r0
+ 24c:	2f 93       	push	r18
+ 24e:	3f 93       	push	r19
+ 250:	4f 93       	push	r20
+ 252:	5f 93       	push	r21
+ 254:	6f 93       	push	r22
+ 256:	7f 93       	push	r23
+ 258:	8f 93       	push	r24
+ 25a:	9f 93       	push	r25
+ 25c:	af 93       	push	r26
+ 25e:	bf 93       	push	r27
+ 260:	ef 93       	push	r30
+ 262:	ff 93       	push	r31
 	//OBS! ADCL ska läsas först sen ADCH, Görs det här???
-	//data_out = (ADCL | (ADCH << 8));
-	data_out = ADCL;
- 25e:	80 91 78 00 	lds	r24, 0x0078
- 262:	90 e0       	ldi	r25, 0x00	; 0
- 264:	90 93 19 01 	sts	0x0119, r25
- 268:	80 93 18 01 	sts	0x0118, r24
-	data_out = (uint16_t)(data_out | (ADCH << 8));
- 26c:	20 91 79 00 	lds	r18, 0x0079
- 270:	80 91 18 01 	lds	r24, 0x0118
- 274:	90 91 19 01 	lds	r25, 0x0119
- 278:	92 2b       	or	r25, r18
- 27a:	90 93 19 01 	sts	0x0119, r25
- 27e:	80 93 18 01 	sts	0x0118, r24
-	//data_out = ADCH;
-	//kan bli så att den aldrig hamnar i Write_to_LCD...
+	data_out = (uint16_t)(ADCL | (ADCH << 8));
+ 264:	80 91 78 00 	lds	r24, 0x0078
+ 268:	20 91 79 00 	lds	r18, 0x0079
+ 26c:	90 e0       	ldi	r25, 0x00	; 0
+ 26e:	92 2b       	or	r25, r18
+ 270:	90 93 1b 01 	sts	0x011B, r25
+ 274:	80 93 1a 01 	sts	0x011A, r24
+	/*********************************************************/
+	//data_out = ADCL;
+	//data_out = (uint16_t)(data_out | (ADCH << 8));
+	/*********************************************************/
+	//data_out = ADC;
 	Write_data_to_LCD(data_out);
- 282:	80 91 18 01 	lds	r24, 0x0118
- 286:	90 91 19 01 	lds	r25, 0x0119
- 28a:	a9 df       	rcall	.-174    	; 0x1de <Write_data_to_LCD>
- 28c:	2f ef       	ldi	r18, 0xFF	; 255
- 28e:	89 e6       	ldi	r24, 0x69	; 105
- 290:	98 e1       	ldi	r25, 0x18	; 24
- 292:	21 50       	subi	r18, 0x01	; 1
- 294:	80 40       	sbci	r24, 0x00	; 0
- 296:	90 40       	sbci	r25, 0x00	; 0
- 298:	e1 f7       	brne	.-8      	; 0x292 <__vector_24+0x5a>
- 29a:	00 c0       	rjmp	.+0      	; 0x29c <__vector_24+0x64>
- 29c:	00 00       	nop
+ 278:	80 91 1a 01 	lds	r24, 0x011A
+ 27c:	90 91 1b 01 	lds	r25, 0x011B
+ 280:	b3 df       	rcall	.-154    	; 0x1e8 <Write_data_to_LCD>
+ 282:	2f ef       	ldi	r18, 0xFF	; 255
+ 284:	89 e6       	ldi	r24, 0x69	; 105
+ 286:	98 e1       	ldi	r25, 0x18	; 24
+ 288:	21 50       	subi	r18, 0x01	; 1
+ 28a:	80 40       	sbci	r24, 0x00	; 0
+ 28c:	90 40       	sbci	r25, 0x00	; 0
+ 28e:	e1 f7       	brne	.-8      	; 0x288 <__vector_24+0x4a>
+ 290:	00 c0       	rjmp	.+0      	; 0x292 <__vector_24+0x54>
+ 292:	00 00       	nop
 	_delay_ms(500);
 	//hoppar man ur avbrottet direkt efter läsningen av ADCH 
 	//eller måste man göra detta?
 	//ADCSRA = (0 << ADEN) | (0 << ADIE);
 	
- 29e:	ff 91       	pop	r31
- 2a0:	ef 91       	pop	r30
- 2a2:	bf 91       	pop	r27
- 2a4:	af 91       	pop	r26
- 2a6:	9f 91       	pop	r25
- 2a8:	8f 91       	pop	r24
- 2aa:	7f 91       	pop	r23
- 2ac:	6f 91       	pop	r22
- 2ae:	5f 91       	pop	r21
- 2b0:	4f 91       	pop	r20
- 2b2:	3f 91       	pop	r19
- 2b4:	2f 91       	pop	r18
- 2b6:	0f 90       	pop	r0
- 2b8:	0b be       	out	0x3b, r0	; 59
- 2ba:	0f 90       	pop	r0
- 2bc:	0f be       	out	0x3f, r0	; 63
- 2be:	0f 90       	pop	r0
- 2c0:	1f 90       	pop	r1
- 2c2:	18 95       	reti
+ 294:	ff 91       	pop	r31
+ 296:	ef 91       	pop	r30
+ 298:	bf 91       	pop	r27
+ 29a:	af 91       	pop	r26
+ 29c:	9f 91       	pop	r25
+ 29e:	8f 91       	pop	r24
+ 2a0:	7f 91       	pop	r23
+ 2a2:	6f 91       	pop	r22
+ 2a4:	5f 91       	pop	r21
+ 2a6:	4f 91       	pop	r20
+ 2a8:	3f 91       	pop	r19
+ 2aa:	2f 91       	pop	r18
+ 2ac:	0f 90       	pop	r0
+ 2ae:	0b be       	out	0x3b, r0	; 59
+ 2b0:	0f 90       	pop	r0
+ 2b2:	0f be       	out	0x3f, r0	; 63
+ 2b4:	0f 90       	pop	r0
+ 2b6:	1f 90       	pop	r1
+ 2b8:	18 95       	reti
 
-000002c4 <__itoa_ncheck>:
- 2c4:	bb 27       	eor	r27, r27
- 2c6:	4a 30       	cpi	r20, 0x0A	; 10
- 2c8:	31 f4       	brne	.+12     	; 0x2d6 <__itoa_ncheck+0x12>
- 2ca:	99 23       	and	r25, r25
- 2cc:	22 f4       	brpl	.+8      	; 0x2d6 <__itoa_ncheck+0x12>
- 2ce:	bd e2       	ldi	r27, 0x2D	; 45
- 2d0:	90 95       	com	r25
- 2d2:	81 95       	neg	r24
- 2d4:	9f 4f       	sbci	r25, 0xFF	; 255
- 2d6:	01 c0       	rjmp	.+2      	; 0x2da <__utoa_common>
+000002ba <__itoa_ncheck>:
+ 2ba:	bb 27       	eor	r27, r27
+ 2bc:	4a 30       	cpi	r20, 0x0A	; 10
+ 2be:	31 f4       	brne	.+12     	; 0x2cc <__itoa_ncheck+0x12>
+ 2c0:	99 23       	and	r25, r25
+ 2c2:	22 f4       	brpl	.+8      	; 0x2cc <__itoa_ncheck+0x12>
+ 2c4:	bd e2       	ldi	r27, 0x2D	; 45
+ 2c6:	90 95       	com	r25
+ 2c8:	81 95       	neg	r24
+ 2ca:	9f 4f       	sbci	r25, 0xFF	; 255
+ 2cc:	01 c0       	rjmp	.+2      	; 0x2d0 <__utoa_common>
 
-000002d8 <__utoa_ncheck>:
- 2d8:	bb 27       	eor	r27, r27
+000002ce <__utoa_ncheck>:
+ 2ce:	bb 27       	eor	r27, r27
 
-000002da <__utoa_common>:
- 2da:	fb 01       	movw	r30, r22
- 2dc:	55 27       	eor	r21, r21
- 2de:	aa 27       	eor	r26, r26
- 2e0:	88 0f       	add	r24, r24
- 2e2:	99 1f       	adc	r25, r25
- 2e4:	aa 1f       	adc	r26, r26
- 2e6:	a4 17       	cp	r26, r20
- 2e8:	10 f0       	brcs	.+4      	; 0x2ee <__utoa_common+0x14>
- 2ea:	a4 1b       	sub	r26, r20
- 2ec:	83 95       	inc	r24
- 2ee:	50 51       	subi	r21, 0x10	; 16
- 2f0:	b9 f7       	brne	.-18     	; 0x2e0 <__utoa_common+0x6>
- 2f2:	a0 5d       	subi	r26, 0xD0	; 208
- 2f4:	aa 33       	cpi	r26, 0x3A	; 58
- 2f6:	08 f0       	brcs	.+2      	; 0x2fa <__utoa_common+0x20>
- 2f8:	a9 5d       	subi	r26, 0xD9	; 217
- 2fa:	a1 93       	st	Z+, r26
- 2fc:	00 97       	sbiw	r24, 0x00	; 0
- 2fe:	79 f7       	brne	.-34     	; 0x2de <__utoa_common+0x4>
- 300:	b1 11       	cpse	r27, r1
- 302:	b1 93       	st	Z+, r27
- 304:	11 92       	st	Z+, r1
- 306:	cb 01       	movw	r24, r22
- 308:	00 c0       	rjmp	.+0      	; 0x30a <strrev>
+000002d0 <__utoa_common>:
+ 2d0:	fb 01       	movw	r30, r22
+ 2d2:	55 27       	eor	r21, r21
+ 2d4:	aa 27       	eor	r26, r26
+ 2d6:	88 0f       	add	r24, r24
+ 2d8:	99 1f       	adc	r25, r25
+ 2da:	aa 1f       	adc	r26, r26
+ 2dc:	a4 17       	cp	r26, r20
+ 2de:	10 f0       	brcs	.+4      	; 0x2e4 <__utoa_common+0x14>
+ 2e0:	a4 1b       	sub	r26, r20
+ 2e2:	83 95       	inc	r24
+ 2e4:	50 51       	subi	r21, 0x10	; 16
+ 2e6:	b9 f7       	brne	.-18     	; 0x2d6 <__utoa_common+0x6>
+ 2e8:	a0 5d       	subi	r26, 0xD0	; 208
+ 2ea:	aa 33       	cpi	r26, 0x3A	; 58
+ 2ec:	08 f0       	brcs	.+2      	; 0x2f0 <__utoa_common+0x20>
+ 2ee:	a9 5d       	subi	r26, 0xD9	; 217
+ 2f0:	a1 93       	st	Z+, r26
+ 2f2:	00 97       	sbiw	r24, 0x00	; 0
+ 2f4:	79 f7       	brne	.-34     	; 0x2d4 <__utoa_common+0x4>
+ 2f6:	b1 11       	cpse	r27, r1
+ 2f8:	b1 93       	st	Z+, r27
+ 2fa:	11 92       	st	Z+, r1
+ 2fc:	cb 01       	movw	r24, r22
+ 2fe:	00 c0       	rjmp	.+0      	; 0x300 <strrev>
 
-0000030a <strrev>:
- 30a:	dc 01       	movw	r26, r24
- 30c:	fc 01       	movw	r30, r24
- 30e:	67 2f       	mov	r22, r23
- 310:	71 91       	ld	r23, Z+
- 312:	77 23       	and	r23, r23
- 314:	e1 f7       	brne	.-8      	; 0x30e <strrev+0x4>
- 316:	32 97       	sbiw	r30, 0x02	; 2
- 318:	04 c0       	rjmp	.+8      	; 0x322 <strrev+0x18>
- 31a:	7c 91       	ld	r23, X
- 31c:	6d 93       	st	X+, r22
- 31e:	70 83       	st	Z, r23
- 320:	62 91       	ld	r22, -Z
- 322:	ae 17       	cp	r26, r30
- 324:	bf 07       	cpc	r27, r31
- 326:	c8 f3       	brcs	.-14     	; 0x31a <strrev+0x10>
- 328:	08 95       	ret
+00000300 <strrev>:
+ 300:	dc 01       	movw	r26, r24
+ 302:	fc 01       	movw	r30, r24
+ 304:	67 2f       	mov	r22, r23
+ 306:	71 91       	ld	r23, Z+
+ 308:	77 23       	and	r23, r23
+ 30a:	e1 f7       	brne	.-8      	; 0x304 <strrev+0x4>
+ 30c:	32 97       	sbiw	r30, 0x02	; 2
+ 30e:	04 c0       	rjmp	.+8      	; 0x318 <strrev+0x18>
+ 310:	7c 91       	ld	r23, X
+ 312:	6d 93       	st	X+, r22
+ 314:	70 83       	st	Z, r23
+ 316:	62 91       	ld	r22, -Z
+ 318:	ae 17       	cp	r26, r30
+ 31a:	bf 07       	cpc	r27, r31
+ 31c:	c8 f3       	brcs	.-14     	; 0x310 <strrev+0x10>
+ 31e:	08 95       	ret
 
-0000032a <_exit>:
- 32a:	f8 94       	cli
+00000320 <_exit>:
+ 320:	f8 94       	cli
 
-0000032c <__stop_program>:
- 32c:	ff cf       	rjmp	.-2      	; 0x32c <__stop_program>
+00000322 <__stop_program>:
+ 322:	ff cf       	rjmp	.-2      	; 0x322 <__stop_program>

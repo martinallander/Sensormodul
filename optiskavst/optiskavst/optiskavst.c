@@ -18,7 +18,7 @@
 #include <stdlib.h>
 
 volatile uint16_t data_out;
-volatile char buffer [2] = {0, 0};
+volatile char buffer [4] = {0, 0, 0, 0};
  
 
 
@@ -59,8 +59,10 @@ void init_AD_conv(void)
 	enable ADC, Auto Trigger och sätter Free Running mode,
 	 avbrott och sätter prescaler bits.
 	 Osäker på ADATE
+	 !!! Tar bort ADATE !!!
 	*/
-	ADCSRA = 1<<ADEN | 1<<ADATE | 1<<ADIE | 1<<ADPS1 | 1<<ADPS0;
+	DDRA = 0x00;
+	ADCSRA = (1<<ADEN) |(1 << ADATE) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
 	
 	//Inte samma funktionalitet i 1284P som i 16...
 	//MCUCR = 1<<SM0 | 1<<ISC01 | 1<<ISC00;
@@ -70,6 +72,7 @@ void init_AD_conv(void)
 void Write_data_to_LCD(uint16_t data)
 {
 	//char buffer [16];
+	//cli();
 	LCD_Clear();
 	LCD_String("Distance:");
 	LCD_Command(0x14);
@@ -77,8 +80,17 @@ void Write_data_to_LCD(uint16_t data)
 	//char hi = data >> 8;
 	//buffer[0] = lo;
 	//buffer[1] = hi;
+	
+	/*
+	 Här sätts data_out till buffer[1]!! Varför?! HUUUUR?!?!?!?
+	Tror det hade med längden av buffer.
+	
+	NYTT MÖJLIGT PROBLEM: Write_data_to_LCD skriver ut en extra "siffra" när
+	t.ex. buffer[3] = 0....
+	*/
 	itoa (data, buffer, 10);
 	LCD_String(buffer);
+	//sei();
 	return 0;
 }
 
@@ -94,9 +106,12 @@ int main(void)
 	init_AD_conv();
 	LCD_Clear();
 	sei();
-	ADCSRA |= (1 << ADSC) | (1 << ADIF);
+	ADCSRA |= (1 << ADSC);
 	
-    while(1){}
+    while(1)
+	{}
+	
+	return 0;
 }
 
 /*
@@ -105,11 +120,12 @@ int main(void)
 ISR(ADC_vect)
 {
 	//OBS! ADCL ska läsas först sen ADCH, Görs det här???
-	//data_out = (ADCL | (ADCH << 8));
-	data_out = ADCL;
-	data_out = (uint16_t)(data_out | (ADCH << 8));
-	//data_out = ADCH;
-	//kan bli så att den aldrig hamnar i Write_to_LCD...
+	data_out = (uint16_t)(ADCL | (ADCH << 8));
+	/*********************************************************/
+	//data_out = ADCL;
+	//data_out = (uint16_t)(data_out | (ADCH << 8));
+	/*********************************************************/
+	//data_out = ADC;
 	Write_data_to_LCD(data_out);
 	_delay_ms(500);
 	//hoppar man ur avbrottet direkt efter läsningen av ADCH 
