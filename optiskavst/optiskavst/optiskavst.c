@@ -17,8 +17,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-volatile uint8_t data_out;
-volatile char buffer [8];
+volatile uint16_t data_out;
+volatile char buffer [2] = {0, 0};
+ 
 
 
 /*sätt max värdet för volt-in i AREF (minus 1 LSB).
@@ -52,7 +53,7 @@ void init_AD_conv(void)
 	Det är i ADMUX som vi väljer VReF om jag förstår rätt.
 	*/
 	//Tror inte vi ska vänsterskifta datan.
-	ADMUX = 1<<ADLAR;
+	//ADMUX = 1<<ADLAR;
 	
 	/*
 	enable ADC, Auto Trigger och sätter Free Running mode,
@@ -69,10 +70,13 @@ void init_AD_conv(void)
 void Write_data_to_LCD(uint16_t data)
 {
 	//char buffer [16];
-	
 	LCD_Clear();
 	LCD_String("Distance:");
 	LCD_Command(0x14);
+	//char lo = data & 0xFF;
+	//char hi = data >> 8;
+	//buffer[0] = lo;
+	//buffer[1] = hi;
 	itoa (data, buffer, 10);
 	LCD_String(buffer);
 	return 0;
@@ -91,11 +95,8 @@ int main(void)
 	LCD_Clear();
 	sei();
 	ADCSRA |= (1 << ADSC) | (1 << ADIF);
-    while(1)
-    {
-        a = a + 1;
-		a = a - 1; 
-    }
+	
+    while(1){}
 }
 
 /*
@@ -104,13 +105,15 @@ int main(void)
 ISR(ADC_vect)
 {
 	//OBS! ADCL ska läsas först sen ADCH, Görs det här???
-	//data_out = (uint16_t)((ADCH << 8) | ADCL);
-	data_out = ADCH;
+	//data_out = (ADCL | (ADCH << 8));
+	data_out = ADCL;
+	data_out = (uint16_t)(data_out | (ADCH << 8));
+	//data_out = ADCH;
 	//kan bli så att den aldrig hamnar i Write_to_LCD...
 	Write_data_to_LCD(data_out);
 	_delay_ms(500);
 	//hoppar man ur avbrottet direkt efter läsningen av ADCH 
 	//eller måste man göra detta?
-	ADCSRA = (0 << ADEN) | (0 << ADIE);
+	//ADCSRA = (0 << ADEN) | (0 << ADIE);
 	
 }
