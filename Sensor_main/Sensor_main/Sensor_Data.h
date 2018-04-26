@@ -1,12 +1,14 @@
 #ifndef SENSOR_DATA
 #define SENSOR_DATA
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 #define PACKET_SIZE (sizeof(Sensor_Data))
-#define IR_SIZE 255
+#define IR_SIZE 256
 #define ANGLE_SIZE 12
-#define DISTANCE_SIZE 12
+#define DISTANCE_SIZE 4
+//#define DISTANCE_SIZE 12
 #define ACC_SIZE 12
 
 struct Sensor_Data
@@ -14,7 +16,8 @@ struct Sensor_Data
 	float acc[3];
 	float gyro[3];
 	float angle[3];
-	float distance[3];
+	float distance;
+	//float distance[3];
 	float ir[64];
 	bool has_data;
 	bool has_ir;
@@ -43,7 +46,8 @@ union Angle_packet
 
 union Distance_packet
 {
-	float distance[3];
+	float distance;
+	//float distance[3];
 	unsigned char packet[DISTANCE_SIZE];
 }; typedef union Distance_packet Distance_packet;
 
@@ -52,5 +56,9 @@ union Acc_packet
 	float acc[3];
 	unsigned char packet[ACC_SIZE];
 }; typedef union Acc_packet Acc_packet;
+
+Sensor_Data* create_empty_sensor(bool data);
+
+Sensor_Data* get_sd();
 
 #endif

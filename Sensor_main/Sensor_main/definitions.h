@@ -2,7 +2,9 @@
 #define F_CPU 16000000UL
 #endif
 
-//****************** I2C ******************
+/******************************************************************
+******************************** I2C ******************************
+******************************************************************/
 #define F_SCL 50UL
 #define Prescaler 1
 #define TWBR_value ((((F_CPU/F_SCL)/Prescaler)-16)/2)
@@ -47,7 +49,9 @@
 #define frame_rate 0x02
 #define AMG8833_RESOLUTION 0.25f
 
-//****************** SPI ******************
+/******************************************************************
+******************************** SPI ******************************
+******************************************************************/
 
 #define ALL_DATA_REQUEST 0x01
 #define ACC_DATA_REQUEST 0x02
@@ -55,5 +59,5 @@
 #define DISTANCE_DATA_REQUEST 0x04
 #define IR_DATA_REQUEST 0x05
 
-#define DATA_ERROR 0x10
-#define DATA_OK 0x11
+#define SPI_DATA_ERROR 0x10
+#define SPI_DATA_OK 0x11

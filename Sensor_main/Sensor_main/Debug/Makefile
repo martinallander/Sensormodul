@@ -39,10 +39,12 @@ SUBDIRS :=
 C_SRCS +=  \
 ../FIFO_Queue.c \
 ../i2c.c \
-../Led.c \
-../Sensor_main.c \
-../spi_slav.c \
-../Timer.c
+../led.c \
+../main.c \
+../sensor_data.c \
+../data_transfer.c \
+../spi_slave.c \
+../timer.c
 
 
 PREPROCESSING_SRCS += 
@@ -54,34 +56,42 @@ ASM_SRCS +=
 OBJS +=  \
 FIFO_Queue.o \
 i2c.o \
-Led.o \
-Sensor_main.o \
-spi_slav.o \
-Timer.o
+led.o \
+main.o \
+sensor_data.o \
+data_transfer.o \
+spi_slave.o \
+timer.o
 
 OBJS_AS_ARGS +=  \
 FIFO_Queue.o \
 i2c.o \
-Led.o \
-Sensor_main.o \
-spi_slav.o \
-Timer.o
+led.o \
+main.o \
+sensor_data.o \
+data_transfer.o \
+spi_slave.o \
+timer.o
 
 C_DEPS +=  \
 FIFO_Queue.d \
 i2c.d \
-Led.d \
-Sensor_main.d \
-spi_slav.d \
-Timer.d
+led.d \
+main.d \
+sensor_data.d \
+data_transfer.d \
+spi_slave.d \
+timer.d
 
 C_DEPS_AS_ARGS +=  \
 FIFO_Queue.d \
 i2c.d \
-Led.d \
-Sensor_main.d \
-spi_slav.d \
-Timer.d
+led.d \
+main.d \
+sensor_data.d \
+data_transfer.d \
+spi_slave.d \
+timer.d
 
 OUTPUT_FILE_PATH +=Sensor_main.elf
 
@@ -97,6 +107,10 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
+
+
 
 
 

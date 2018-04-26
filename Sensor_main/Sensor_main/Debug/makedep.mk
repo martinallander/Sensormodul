@@ -6,11 +6,15 @@ FIFO_Queue.c
 
 i2c.c
 
-Led.c
+led.c
 
-Sensor_main.c
+main.c
 
-spi_slav.c
+sensor_data.c
 
-Timer.c
+data_transfer.c
+
+spi_slave.c
+
+timer.c
 

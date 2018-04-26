@@ -126,28 +126,34 @@
     <Compile Include="i2c.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Led.c">
+    <Compile Include="led.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Led.h">
+    <Compile Include="led.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Sensor_Data.h">
+    <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Sensor_main.c">
+    <Compile Include="sensor_data.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Sensor_main.h">
+    <Compile Include="sensor_data.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="spi_slav.c">
+    <Compile Include="data_transfer.c">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="spi_slav.h">
+    <Compile Include="data_transfer.h">
       <SubType>compile</SubType>
     </Compile>
-    <Compile Include="Timer.c">
+    <Compile Include="spi_slave.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="spi_slave.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="timer.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="timer.h">

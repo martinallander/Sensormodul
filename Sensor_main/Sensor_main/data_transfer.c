@@ -2,7 +2,7 @@
 #define F_CPU 16000000UL
 #endif
 
-#include "Sensor_main.h"
+#include "data_transfer.h"
 #include <stdbool.h>
 
 /* Kalibreringsvärden som räknas ut initialt för att sedan
@@ -21,8 +21,6 @@ float gyro_time = 0.0;
 float acc_time = 0.0;
 
 bool data_sending = false;
-
-Sensor_Data* sd;
 
 /******************************************************************
 ********************** INITIALIZER FUNCTIONS **********************
@@ -121,9 +119,8 @@ void initialize_all(void)
 	sei();
 	init_sensors();
 	data_direction_init();
-	led_blink_red(1);
-	led_blink_green(1);
 	led_blink_yellow(1);
+	led_blink_green(1);
 	timer_1_init(8.0);
 }
 
@@ -278,7 +275,11 @@ void get_angle(Sensor_Data* sd)
 	return;
 }
 
+
+
+
 //Integrerar accelerationen för att beräkna sträcka
+/*
 void get_distance(Sensor_Data* sd)
 {
 	get_acc(sd);
@@ -294,6 +295,7 @@ void get_distance(Sensor_Data* sd)
 	timer_1_start();
 	return;
 }
+*/
 
 /******************************************************************
 ************************** SPI FUNCTIONS **************************
@@ -303,14 +305,12 @@ void send_data(Sensor_Data* sd)
 {
 	unsigned char data = 0;
 	data = SPDR;
-	//led_blink_yellow(data);
 	switch(data)
 	{
 		case IR_DATA_REQUEST :
 			if(sd->has_ir)
 			{
-				spi_tranceiver(DATA_OK);
-				spi_tranceiver(IR_SIZE);
+				spi_tranceiver(SPI_DATA_OK);
 				IR_packet ir_packet;
 				for(int i = 0; i < 64; i++)
 				{
@@ -327,9 +327,7 @@ void send_data(Sensor_Data* sd)
 			if(sd->has_angle)
 			{
 				
-				spi_tranceiver(DATA_OK);
-				
-				spi_tranceiver(ANGLE_SIZE);
+				spi_tranceiver(SPI_DATA_OK);
 				Angle_packet angle_packet;
 				
 				for(int i = 0; i < 3; i++)
@@ -350,14 +348,18 @@ void send_data(Sensor_Data* sd)
 		case DISTANCE_DATA_REQUEST :
 			if(sd->has_distance)
 			{
-				spi_tranceiver(DATA_OK);
-				spi_tranceiver(DISTANCE_SIZE);
+				spi_tranceiver(SPI_DATA_OK);
 				Distance_packet distance_packet;
 				
+				distance_packet.distance = sd->distance;
+				
+				/*
 				for(int i = 0; i < 3; i++)
 				{
 					distance_packet.distance[i] = sd->distance[i];
 				}
+				*/
+				
 				for (int i = 0; i < DISTANCE_SIZE; i++)
 				{
 					spi_tranceiver(distance_packet.packet[i]);
@@ -368,8 +370,7 @@ void send_data(Sensor_Data* sd)
 		case ACC_DATA_REQUEST :
 			if(sd->has_acc)
 			{
-				spi_tranceiver(DATA_OK);
-				spi_tranceiver(ACC_SIZE);
+				spi_tranceiver(SPI_DATA_OK);
 				Acc_packet acc_packet;
 				
 				for(int i = 0; i < 3; i++)
@@ -386,8 +387,7 @@ void send_data(Sensor_Data* sd)
 		case ALL_DATA_REQUEST :
 			if(sd->has_data)
 			{
-				spi_tranceiver(DATA_OK);
-				spi_tranceiver(PACKET_SIZE);
+				spi_tranceiver(SPI_DATA_OK);
 				SPI_packet spi_packet;
 				spi_packet.sd = *sd;
 				for (int i = 0; i < PACKET_SIZE; i++)
@@ -398,23 +398,25 @@ void send_data(Sensor_Data* sd)
 			break;
 			
 		default :
-			led_blink_green(1);
-			spi_tranceiver(DATA_ERROR);
+			spi_tranceiver(SPI_DATA_ERROR);
 			break;
 	}
 	data_sending = false;
 	return;
 }
 
+/******************************************************************
+****************************** AVBROTT ****************************
+******************************************************************/
+
 /* 
-	********* AVBROTT **********
 	Kan finnas flera ISR som använder olika avbrottsvektorer.
 	SPI_STC_vect: SPI Serial Transfer Complete 
 	INT0_vect: External interrupt
 	
 	Externa avbrott:
 	EICRA – External Interrupt Control Register A
-	EIFR –External Interrupt Flag Register
+	EIFR – External Interrupt Flag Register
 	EIMSK – External Interrupt Mask Register
 	ISC - Interrupt Sense Control (1,1 -> rising edge)
 	
@@ -429,45 +431,7 @@ ISR(SPI_STC_vect)
 	if (!(data_sending))
 	{
 		data_sending = true;
-		send_data(sd);
+		send_data(get_sd());
 	}
 }
 
-/******************************************************************
-****************************** MAIN *******************************
-******************************************************************/
-
-int main(void)
-{
-	sd = create_empty_sensor(true);
-	initialize_all();
-	_delay_ms(1000);
-	while(1) 
-	{
-		get_temp(sd);
-	}
-	free(sd);
-	return 0;
-}
-
-
-/*
-unsigned char data = 0;
-for (int i = 0; i < 64; i++)
-{
-	sd->ir[i] = i;
-}
-SPI_Packet sp;
-sp.sd = *sd;
-data = spi_tranceiver(data);
-
-if (data == 0xAA)
-{
-	led_blink_green(1);
-}
-//int x = PACKET_SIZE;
-for (int i = 0; i < PACKET_SIZE; i++)
-{
-	spi_tranceiver(sp.packet[i]);
-}
-*/

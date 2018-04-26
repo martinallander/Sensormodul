@@ -1,12 +1,10 @@
 ﻿#ifndef I2C
 #define I2C
 
-
 #include <util/twi.h>
 #include <avr/interrupt.h>
 #include <stdbool.h>
 #include "definitions.h"
-
 
 void i2c_init(void);
 

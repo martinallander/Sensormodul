@@ -1,12 +1,4 @@
-﻿/*
- * Sensor_main.h
- *
- * Created: 4/23/2018 10:03:02 AM
- *  Author: ludju571
- */ 
-
-
-#ifndef SENSOR_MAIN_H_
+﻿#ifndef SENSOR_MAIN_H_
 #define SENSOR_MAIN_H_
 
 #include <avr/io.h>
@@ -17,10 +9,11 @@
 #include <math.h>
 #include "definitions.h"
 #include "FIFO_Queue.h"
-#include "spi_slav.h"
+#include "spi_slave.h"
 #include "i2c.h"
-#include "Led.h"
+#include "led.h"
 #include "timer.h"
+#include "sensor_data.h"
 
 float format_acc(uint8_t low, uint8_t high);
 
@@ -54,5 +47,8 @@ void initialize_all(void);
 
 void send_data(Sensor_Data* sd);
 
+Sensor_Data* create_empty_sensor(bool data);
+
+Sensor_Data* get_sd();
 
 #endif /* SENSOR_MAIN_H_ */
