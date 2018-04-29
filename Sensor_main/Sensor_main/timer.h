@@ -1,9 +1,14 @@
-﻿#include <avr/io.h>
+﻿#ifndef TIMER_H
+#define TIMER_H
+
+#ifndef F_CPU
+#define F_CPU 16000000UL
+#endif
+
+#include <avr/io.h>
 #include <avr/interrupt.h>
 #include "definitions.h"
 
-#ifndef TIMER_H
-#define TIMER_H
 
 ISR(TIMER1_OVF_vect);
 void timer_1_init(float prescaler);

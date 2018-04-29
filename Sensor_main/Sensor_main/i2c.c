@@ -42,49 +42,48 @@ ISR(TWI_vect)
 	switch (status)
 	{
 		case TW_START:						 //0x08
-		i2c_send_data(device_addr + I2C_WRITE);
-		break;
+			i2c_send_data(device_addr + I2C_WRITE);
+			break;
 		case TW_REP_START:					 //0x10
-		i2c_send_data(device_addr + I2C_READ);
-		break;
+			i2c_send_data(device_addr + I2C_READ);
+			break;
 		case TW_MT_SLA_ACK:					 //3
-		i2c_send_data(register_addr);		 //load the register we want to handle
-		break;
+			i2c_send_data(register_addr);		 //load the register we want to handle
+			break;
 		case TW_MT_SLA_NACK:				 //4
-		i2c_stop();	
-		break;
+			i2c_stop();	
+			break;
 		case TW_MT_DATA_ACK:				 //5
-		if(write_to_slave)
-		{
-			if(n_o_writes == 0)
+			if(write_to_slave)
 			{
-				i2c_stop();
-				break;
+				if(n_o_writes == 0)
+				{
+					i2c_stop();
+					break;
+				}
+				else
+				{
+					i2c_send_data(trans_data);
+				}
+				n_o_writes = n_o_writes - 1; 
 			}
 			else
 			{
-				i2c_send_data(trans_data);
+				i2c_start(); //repeated start
 			}
-			n_o_writes = n_o_writes - 1; 
-		}
-		else
-		{
-			i2c_start(); //repeated start
-		}
 		
-		break;
+			break;
 		case TW_MR_SLA_ACK: //6
-		TWCR = (1 << TWINT)|(0 << TWSTA)|(0 << TWSTO)|(0 << TWEA)|(1 << TWEN)|(1 << TWIE);
-		break;
+			TWCR = (1 << TWINT)|(0 << TWSTA)|(0 << TWSTO)|(0 << TWEA)|(1 << TWEN)|(1 << TWIE);
+			break;
 		case TW_MR_DATA_NACK: //7
-		rec_data = TWDR;
-		i2c_stop();
-		break;
+			rec_data = TWDR;
+			i2c_stop();
+			break;
 		case TW_MR_DATA_ACK: //8
-		rec_data = TWDR;
-		i2c_stop();
-
-		break;
+			rec_data = TWDR;
+			i2c_stop();
+			break;
 	}
 }
 

@@ -1,9 +1,7 @@
-#ifndef F_CPU
-#define F_CPU 16000000UL
-#endif
-
 #include "data_transfer.h"
 #include <stdbool.h>
+
+Sensor_Data* current_data;
 
 /* Kalibreringsvärden som räknas ut initialt för att sedan
 subtraheras från sensordatan */
@@ -330,18 +328,23 @@ void send_data(Sensor_Data* sd)
 				spi_tranceiver(SPI_DATA_OK);
 				Angle_packet angle_packet;
 				
+	
 				for(int i = 0; i < 3; i++)
 				{
 					angle_packet.angle[i] = sd->angle[i];
 				}
+				
 				for (int i = 0; i < ANGLE_SIZE; i++)
 				{
 					spi_tranceiver(angle_packet.packet[i]);
 				}
+				
 				for(int i = 0; i < 3; i++)
 				{
 					sd->angle[i] = 0;
 				}
+				
+			
 			}
 			break;
 		
@@ -396,13 +399,11 @@ void send_data(Sensor_Data* sd)
 				}
 			}
 			break;
-			
-		default :
+		/*default :
 			spi_tranceiver(SPI_DATA_ERROR);
-			break;
+			led_blink_yellow(1);
+			break;*/
 	}
-	data_sending = false;
-	return;
 }
 
 /******************************************************************
@@ -427,11 +428,26 @@ void send_data(Sensor_Data* sd)
 
 ISR(SPI_STC_vect)  
 {  
-	//led_blink_green(1);
 	if (!(data_sending))
 	{
 		data_sending = true;
-		send_data(get_sd());
+		send_data(current_data);
+		data_sending = false;
+	}
+	else
+	{
+		led_blink_red(1);
 	}
 }
 
+int main(void)
+{
+	initialize_all();
+	current_data = create_empty_sensor(true);
+	while(1)
+	{
+		get_angle(current_data);
+	}
+	free(current_data);
+	return 0;
+}

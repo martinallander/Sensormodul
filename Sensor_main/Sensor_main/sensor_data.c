@@ -1,5 +1,4 @@
-﻿
-#include "sensor_data.h"
+﻿#include "sensor_data.h"
 
 Sensor_Data* sd;
 
