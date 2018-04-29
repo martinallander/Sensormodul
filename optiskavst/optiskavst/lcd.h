@@ -8,10 +8,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 
-#define LCD_Dir DDRA					// LCD data port direction
-#define LCD_Port PORTA					// LCD data port
-#define RS PINA3						// Signalpin för Register Select (data reg./command reg.)
-#define EN PINA2 						// Signalpin för Enable
+#define LCD_Dir DDRB					// LCD data port direction
+#define LCD_Port PORTB					// LCD data port
+#define RS PINB3						// Signalpin för Register Select (data reg./command reg.)
+#define EN PINB2 						// Signalpin för Enable
 
 void LCD_Command( unsigned char cmnd );
 

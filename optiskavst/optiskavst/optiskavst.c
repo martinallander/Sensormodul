@@ -16,9 +16,11 @@
 #include <util/delay.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
-volatile uint16_t data_out;
-volatile char buffer [4] = {0, 0, 0, 0};
+volatile uint16_t digital_data;
+volatile int distance;
+volatile char/* * */ buffer [4] = {0, 0, 0, 0};
  
 
 
@@ -61,7 +63,7 @@ void init_AD_conv(void)
 	 Osäker på ADATE
 	 !!! Tar bort ADATE !!!
 	*/
-	DDRA = 0x00;
+	//DDRA = 0x00;
 	ADCSRA = (1<<ADEN) |(1 << ADATE) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
 	
 	//Inte samma funktionalitet i 1284P som i 16...
@@ -69,7 +71,7 @@ void init_AD_conv(void)
 	return 0;
 }
 
-void Write_data_to_LCD(uint16_t data)
+void Write_data_to_LCD(int data)
 {
 	//char buffer [16];
 	//cli();
@@ -89,16 +91,26 @@ void Write_data_to_LCD(uint16_t data)
 	t.ex. buffer[3] = 0....
 	*/
 	itoa (data, buffer, 10);
+	//sprintf(buffer, "%1f", data);
 	LCD_String(buffer);
+	LCD_Command(0x14);
+	LCD_String("cm");
 	//sei();
 	return 0;
+}
+
+double format_digital_data(uint16_t unformated_data)
+{
+	//uint16_t formated_data = (-0.0243)*pow(unformated_data,3) + (0.8741)*pow(unformated_data,2) - (0.8226)*unformated_data + (9.1667);
+	//double formated_data = (double)((0.4735)*pow(unformated_data,2) + (2.6705)*unformated_data + (7.0833));
+	double formated_data = (double)(18265*pow(unformated_data,-1.226));
+	return formated_data;
 }
 
 int main(void)
 {
 	//volatile uint16_t data_out;
 	//volatile char buffer [16];
-	int a = 0;
 	LCD_Init();
 	LCD_Clear();
 	LCD_String("Device's On");
@@ -120,14 +132,17 @@ int main(void)
 ISR(ADC_vect)
 {
 	//OBS! ADCL ska läsas först sen ADCH, Görs det här???
-	data_out = (uint16_t)(ADCL | (ADCH << 8));
+//	ADCSRA = (1<<ADEN) |(1 << ADATE) | (0 << ADIE) | (1 << ADPS1) | (1 << ADPS0);;
+	digital_data = (uint16_t)(ADCL | (ADCH << 8));
 	/*********************************************************/
 	//data_out = ADCL;
 	//data_out = (uint16_t)(data_out | (ADCH << 8));
 	/*********************************************************/
 	//data_out = ADC;
-	Write_data_to_LCD(data_out);
+	distance = (int)(format_digital_data(digital_data));
+	Write_data_to_LCD(distance);
 	_delay_ms(500);
+//	ADCSRA |= (1 << ADIE);
 	//hoppar man ur avbrottet direkt efter läsningen av ADCH 
 	//eller måste man göra detta?
 	//ADCSRA = (0 << ADEN) | (0 << ADIE);
