@@ -48,17 +48,17 @@ void first_conversion(void)
 	ADCSRA |= (1 << ADSC);
 }
 
-void Write_data_to_LCD(int data)
-{
-	LCD_Clear();
-	LCD_String("Distance:");
-	LCD_Command(0x14);
-	itoa (data, buffer, 10);
-	LCD_String(buffer);
-	LCD_Command(0x14);
-	LCD_String("cm");
-	return 0;
-}
+//void Write_data_to_LCD(int data)
+//{
+	//LCD_Clear();
+	//LCD_String("Distance:");
+	//LCD_Command(0x14);
+	//itoa (data, buffer, 10);
+	//LCD_String(buffer);
+	//LCD_Command(0x14);
+	//LCD_String("cm");
+	//return 0;
+//}
 
 float format_digital_data(uint16_t unformated_data)
 {
@@ -78,22 +78,22 @@ float format_digital_data(uint16_t unformated_data)
 	return formated_data;
 }
 
-int main(void)
-{
-	LCD_Init();
-	LCD_Clear();
-	LCD_String("Device's On");
-	_delay_ms(2000);
-	init_AD_conv();
-	LCD_Clear();
-	sei();
-	ADCSRA |= (1 << ADSC);
-	
-    while(1)
-	{}
-	
-	return 0;
-}
+//int main(void)
+//{
+	//LCD_Init();
+	//LCD_Clear();
+	//LCD_String("Device's On");
+	//_delay_ms(2000);
+	//init_AD_conv();
+	//LCD_Clear();
+	//sei();
+	//ADCSRA |= (1 << ADSC);
+	//
+    //while(1)
+	//{}
+	//
+	//return 0;
+//}
 
 ISR(ADC_vect)
 {
@@ -104,6 +104,6 @@ ISR(ADC_vect)
 	//Write_data_to_LCD(digital_data); 
 	/*------------------------------------------------------*/
 	distance = (int)(format_digital_data(digital_data));
-	Write_data_to_LCD(distance); 
+	//Write_data_to_LCD(distance); 
 	_delay_ms(500);
 }
