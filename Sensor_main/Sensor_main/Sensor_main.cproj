@@ -135,6 +135,12 @@
     <Compile Include="main.c">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="optiskavst.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="optiskavst.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="sensor_data.c">
       <SubType>compile</SubType>
     </Compile>
