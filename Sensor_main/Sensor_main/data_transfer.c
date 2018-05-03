@@ -18,6 +18,10 @@ float calibrated_acc_z = 0.0;
 float gyro_time = 0.0;
 float acc_time = 0.0;
 
+/*Variabler för avståndsmätaren*/
+volatile uint16_t digital_data;
+volatile float distance_value;
+
 bool data_sending = false;
 
 /******************************************************************
@@ -45,6 +49,13 @@ void init_gyro(void)
 	i2c_write_reg(gyro_addr, ctrl_reg_1, ctrl_reg_gyro_1, 1);
 	_delay_ms(10);
 	return;
+}
+
+void init_distance(void)
+{
+	//sätt ADATE för Free Running Mode
+	ADCSRA = (1<<ADEN) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
+	return 0;
 }
 
 
@@ -100,6 +111,7 @@ void calibrate_acc()
 void init_sensors(void)
 {
 	init_temp();
+	init_distance();
 	init_acc();
 	init_gyro();
 	calibrate_gyro();
@@ -147,6 +159,22 @@ float format_temp(uint8_t low, uint8_t high)
 	return (float)merged_data * AMG8833_RESOLUTION;
 }
 
+float format_distance(uint16_t unformated_data)
+{
+	//kalibrering v.1.0
+	//float formated_data = (float)((18265)*(pow(unformated_data,-1.226)));
+	//Kalibrering v.1.1
+	//float formated_data = (float)((10879)*(pow(unformated_data,-1.122)));
+	//kalibrering v.1.2 avrundat
+	//float formated_data = (float)((10991)*(pow(unformated_data,-1.124)));
+	//kalibrering v. 1.3
+	float formated_data = (float)((7*pow(10,-9))*(pow(unformated_data,4)) +
+									(-1*pow(10,-5)) * (pow(unformated_data,3)) +
+										(0.0056)*(pow(unformated_data,2)) +
+											(-1.4198)*unformated_data +
+												158.22);
+	return formated_data;
+}
 /******************************************************************
 ******************** GET SENSOR DATA FUNCTIONS ********************
 ******************************************************************/
@@ -273,8 +301,19 @@ void get_angle(Sensor_Data* sd)
 	return;
 }
 
+void measure_distance(void)
+{
+	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
+	return 0;
+}
 
-
+void get_distance(Sensor_Data* sd)
+{
+	measure_distance();
+	_delay_ms(5);
+	sd->distance = distance_value;
+	return;
+}
 
 //Integrerar accelerationen för att beräkna sträcka
 /*
@@ -438,6 +477,20 @@ ISR(SPI_STC_vect)
 	{
 		led_blink_red(1);
 	}
+}
+
+ISR(ADC_vect)
+{
+	digital_data = (uint16_t)(ADCL | (ADCH << 8));
+	/*********************************************************
+						Vid kalibrering:
+	*********************************************************/
+	//Write_data_to_LCD(digital_data); 
+	/*------------------------------------------------------*/
+	distance_value = format_distance(digital_data);
+	//Write_data_to_LCD(distance); 
+	_delay_ms(1);
+	ADCSRA |= (0 << ADEN) | (0 << ADIE);
 }
 
 int main(void)

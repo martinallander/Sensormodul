@@ -25,11 +25,17 @@ float format_gyro(uint8_t low, uint8_t high);
 
 float format_temp(uint8_t low, uint8_t high);
 
+float format_distance(uint16_t unformated_data);
+
 void init_temp(void);
 
 void init_acc(void);
 
 void init_gyro(void);
+
+void init_distance(void);
+
+void measure_distance(void);
 
 void get_temp(Sensor_Data* sd);
 
@@ -38,6 +44,8 @@ void get_acc(Sensor_Data* sd);
 void get_gyro(Sensor_Data* sd);
 
 void get_angle(Sensor_Data* sd);
+
+void get_distance(Sensor_Data* sd);
 
 void get_uncalibrated_gyro(Sensor_Data* sd);
 

@@ -10,8 +10,6 @@ led.c
 
 main.c
 
-optiskavst.c
-
 sensor_data.c
 
 data_transfer.c

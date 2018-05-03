@@ -41,7 +41,6 @@ C_SRCS +=  \
 ../i2c.c \
 ../led.c \
 ../main.c \
-../optiskavst.c \
 ../sensor_data.c \
 ../data_transfer.c \
 ../spi_slave.c \
@@ -59,7 +58,6 @@ FIFO_Queue.o \
 i2c.o \
 led.o \
 main.o \
-optiskavst.o \
 sensor_data.o \
 data_transfer.o \
 spi_slave.o \
@@ -70,7 +68,6 @@ FIFO_Queue.o \
 i2c.o \
 led.o \
 main.o \
-optiskavst.o \
 sensor_data.o \
 data_transfer.o \
 spi_slave.o \
@@ -81,7 +78,6 @@ FIFO_Queue.d \
 i2c.d \
 led.d \
 main.d \
-optiskavst.d \
 sensor_data.d \
 data_transfer.d \
 spi_slave.d \
@@ -92,7 +88,6 @@ FIFO_Queue.d \
 i2c.d \
 led.d \
 main.d \
-optiskavst.d \
 sensor_data.d \
 data_transfer.d \
 spi_slave.d \
@@ -112,8 +107,6 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
-
-
 
 
 

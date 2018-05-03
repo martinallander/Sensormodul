@@ -34,11 +34,13 @@
 								Functions
 ****************************************************************************/
 
-void init_AD_conv(void);
+void init_distance(void);
 
-void first_conversion(void);
+void measure_distance(void);
 
-float format_digital_data(uint16_t unformated_data);
+void get_distance(Sensor_Data* sd);
+
+float format_distance(uint16_t unformated_data);
 
 ISR(ADC_vect);
 

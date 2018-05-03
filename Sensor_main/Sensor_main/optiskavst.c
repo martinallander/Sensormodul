@@ -21,13 +21,8 @@
 #include "optiskavst.h"
 
 volatile uint16_t digital_data;
-volatile int distance;
-volatile char buffer [3];
-
-/*!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-!! Koppla 5V till AREF !!
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
-
+volatile float distance_value;
+//volatile char buffer [3];
 
 //för att minska strömanvändningen se DIDR0 s.259
 /************************************************************************
@@ -35,16 +30,17 @@ volatile char buffer [3];
 	som trigger source!
 ************************************************************************/
 
-void init_AD_conv(void)
+void init_distance(void)
 {
-
-	ADCSRA = (1<<ADEN) |(1 << ADATE) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
+	//sätt ADATE för Free Running Mode
+	ADCSRA = (1<<ADEN) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
 	return 0;
 }
 
-void first_conversion(void)
+void measure_distance(void)
 {
-	ADCSRA |= (1 << ADSC);
+	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
+	return 0;
 }
 
 //void Write_data_to_LCD(int data)
@@ -59,7 +55,7 @@ void first_conversion(void)
 	//return 0;
 //}
 
-float format_digital_data(uint16_t unformated_data)
+float format_distance(uint16_t unformated_data)
 {
 	//kalibrering v.1.0
 	//float formated_data = (float)((18265)*(pow(unformated_data,-1.226)));
@@ -73,10 +69,30 @@ float format_digital_data(uint16_t unformated_data)
 								  (0.0056)*(pow(unformated_data,2)) +
 								   (-1.4198)*unformated_data + 
 								   158.22);
-	
 	return formated_data;
 }
 
+ISR(ADC_vect)
+{
+	digital_data = (uint16_t)(ADCL | (ADCH << 8));
+	/*********************************************************
+						Vid kalibrering:
+	*********************************************************/
+	//Write_data_to_LCD(digital_data); 
+	/*------------------------------------------------------*/
+	distance_value = format_distance(digital_data);
+	//Write_data_to_LCD(distance); 
+	_delay_ms(1);
+	ADCSRA |= (0 << ADEN) | (0 << ADIE);
+}
+
+void get_distance(Sensor_Data* sd)
+{
+	measure_distance();
+	_delay_ms(5);
+	sd->distance = distance_value;
+	return 0;
+}
 //int main(void)
 //{
 	//LCD_Init();
@@ -94,15 +110,3 @@ float format_digital_data(uint16_t unformated_data)
 	//return 0;
 //}
 
-ISR(ADC_vect)
-{
-	digital_data = (uint16_t)(ADCL | (ADCH << 8));
-	/*********************************************************
-						Vid kalibrering:
-	*********************************************************/
-	//Write_data_to_LCD(digital_data); 
-	/*------------------------------------------------------*/
-	distance = (int)(format_digital_data(digital_data));
-	//Write_data_to_LCD(distance); 
-	_delay_ms(500);
-}
