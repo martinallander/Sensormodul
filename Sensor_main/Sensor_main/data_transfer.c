@@ -55,7 +55,7 @@ void init_distance(void)
 {
 	//sätt ADATE för Free Running Mode
 	ADCSRA = (1<<ADEN) | (1<<ADIE) | (1<<ADPS1) | (1<<ADPS0);
-	return 0;
+	return;
 }
 
 
@@ -304,7 +304,7 @@ void get_angle(Sensor_Data* sd)
 void measure_distance(void)
 {
 	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
-	return 0;
+	return;
 }
 
 void get_distance(Sensor_Data* sd)
@@ -473,10 +473,6 @@ ISR(SPI_STC_vect)
 		send_data(current_data);
 		data_sending = false;
 	}
-	else
-	{
-		led_blink_red(1);
-	}
 }
 
 ISR(ADC_vect)
@@ -497,9 +493,9 @@ int main(void)
 {
 	initialize_all();
 	current_data = create_empty_sensor(true);
-	while(1)
+	while(1) 
 	{
-		get_angle(current_data);
+		get_distance(current_data);
 	}
 	free(current_data);
 	return 0;
