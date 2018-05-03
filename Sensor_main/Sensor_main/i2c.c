@@ -1,6 +1,6 @@
 #include "i2c.h"
 
-volatile bool i2c_done = 0;
+volatile bool i2c_done = 1;
 volatile bool write_to_slave = 1;
 volatile uint8_t trans_data;
 volatile uint8_t rec_data;

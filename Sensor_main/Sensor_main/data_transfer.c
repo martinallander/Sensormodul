@@ -477,7 +477,7 @@ ISR(SPI_STC_vect)
 
 ISR(ADC_vect)
 {
-	digital_data = (uint16_t)(ADCL | (ADCH << 8));
+	uint16_t digital_data = (uint16_t)(ADCL | (ADCH << 8));
 	/*********************************************************
 						Vid kalibrering:
 	*********************************************************/
@@ -495,7 +495,10 @@ int main(void)
 	current_data = create_empty_sensor(true);
 	while(1) 
 	{
+		get_acc(current_data);
+		get_angle(current_data);
 		get_distance(current_data);
+		get_temp(current_data);
 	}
 	free(current_data);
 	return 0;
