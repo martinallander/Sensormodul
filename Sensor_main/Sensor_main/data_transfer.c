@@ -111,12 +111,12 @@ void calibrate_acc()
 void init_sensors(void)
 {
 	init_temp();
-	init_distance();
-	init_acc();
-	init_gyro();
-	calibrate_gyro();
-	calibrate_acc();
-	return;
+ 	//init_distance();
+ 	//init_acc();
+ 	//init_gyro();
+ 	//calibrate_gyro();
+ 	//calibrate_acc();
+ 	return;
 }
 
 //Initierar I2C- och SPI-bussen samt sensorer, LEDs och timern
@@ -495,9 +495,9 @@ int main(void)
 	current_data = create_empty_sensor(true);
 	while(1) 
 	{
-		get_acc(current_data);
-		get_angle(current_data);
-		get_distance(current_data);
+		//get_acc(current_data);
+		//get_angle(current_data);
+		//get_distance(current_data);
 		get_temp(current_data);
 	}
 	free(current_data);
