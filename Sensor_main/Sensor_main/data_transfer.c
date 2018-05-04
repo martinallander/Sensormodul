@@ -19,7 +19,7 @@ float gyro_time = 0.0;
 float acc_time = 0.0;
 
 /*Variabler för avståndsmätaren*/
-volatile uint16_t digital_data;
+
 volatile float distance_value;
 
 bool data_sending = false;
@@ -111,11 +111,11 @@ void calibrate_acc()
 void init_sensors(void)
 {
 	init_temp();
- 	//init_distance();
- 	//init_acc();
- 	//init_gyro();
- 	//calibrate_gyro();
- 	//calibrate_acc();
+ 	init_distance();
+ 	init_acc();
+ 	init_gyro();
+ 	calibrate_gyro();
+ 	calibrate_acc();
  	return;
 }
 
@@ -291,9 +291,9 @@ void get_angle(Sensor_Data* sd)
 	get_gyro(sd);
 	gyro_time += timer_1_get_time();
 	
-	sd->angle[0] += (sd->gyro[0] * gyro_time) * 3.0;
-	sd->angle[1] += (sd->gyro[1] * gyro_time) * 3.0;
-	sd->angle[2] += (sd->gyro[2] * gyro_time) * 3.0;
+	sd->angle[0] += (sd->gyro[0] * gyro_time);
+	sd->angle[1] += (sd->gyro[1] * gyro_time);
+	sd->angle[2] += (sd->gyro[2] * gyro_time);
 	
 	acc_time += gyro_time;
 	gyro_time = 0.0;
@@ -311,7 +311,7 @@ void get_distance(Sensor_Data* sd)
 {
 	measure_distance();
 	_delay_ms(5);
-	sd->distance = distance_value;
+	sd->distance = (float)distance_value;
 	return;
 }
 
@@ -495,9 +495,9 @@ int main(void)
 	current_data = create_empty_sensor(true);
 	while(1) 
 	{
-		//get_acc(current_data);
-		//get_angle(current_data);
-		//get_distance(current_data);
+		get_acc(current_data);
+		get_angle(current_data);
+		get_distance(current_data);
 		get_temp(current_data);
 	}
 	free(current_data);
