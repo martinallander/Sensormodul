@@ -21,6 +21,7 @@ float acc_time = 0.0;
 /*Variabler för avståndsmätaren*/
 
 volatile float distance_value;
+//volatile uint16_t digital_data;
 
 bool data_sending = false;
 
@@ -485,8 +486,8 @@ ISR(ADC_vect)
 	/*------------------------------------------------------*/
 	distance_value = format_distance(digital_data);
 	//Write_data_to_LCD(distance); 
-	_delay_ms(1);
-	ADCSRA |= (0 << ADEN) | (0 << ADIE);
+	//_delay_ms(1);
+	//ADCSRA = (0 << ADEN) | (0 << ADIE);
 }
 
 int main(void)
