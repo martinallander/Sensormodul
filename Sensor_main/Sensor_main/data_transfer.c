@@ -237,8 +237,33 @@ void get_acc(Sensor_Data* sd)
 	sd->acc[0] = -(data_x - calibrated_acc_x);
 	sd->acc[1] = -(data_y - calibrated_acc_y);
 	sd->acc[2] = -(data_z - calibrated_acc_z);
+	
+	for(int i = 0; i < 3; i++)
+	{
+		if(sd->acc[i] < 0.01)
+		{
+			sd->acc[i] = 0.0;
+		}
+	}
 	return;
 }
+
+
+//Integrerar accelerationen för att beräkna hastighet
+void get_velocity(Sensor_Data* sd)
+{
+	get_acc(sd);
+	acc_time += timer_1_get_time();
+	sd->velocity[0] += (sd->acc[0] * acc_time);
+	sd->velocity[1] += (sd->acc[1] * acc_time);
+	sd->velocity[2] += (sd->acc[2] * acc_time);
+	
+	gyro_time += acc_time;
+	acc_time = 0.0;
+	timer_1_start();
+	return;
+}
+
 
 //Används enbart till att kalibrera gyrometern
 void get_uncalibrated_gyro(Sensor_Data* sd)
@@ -283,6 +308,14 @@ void get_gyro(Sensor_Data* sd)
 	sd->gyro[0] = data_x - calibrated_gyro_x;
 	sd->gyro[1] = data_y - calibrated_gyro_y;
 	sd->gyro[2] = data_z - calibrated_gyro_z;
+	
+	for(int i = 0; i < 3; i++)
+	{
+		if(sd->gyro[i] < 0.03)
+		{
+			sd->gyro[i] = 0.0;
+		}
+	}
 	return;
 }
 
@@ -384,7 +417,30 @@ void send_data(Sensor_Data* sd)
 					sd->angle[i] = 0;
 				}
 				
+			}
+			break;
 			
+		case VELOCITY_DATA_REQUEST :
+			if(sd->has_velocity)
+			{
+			
+				spi_tranceiver(SPI_DATA_OK);
+				Velocity_packet velocity_packet;
+			
+				for(int i = 0; i < 3; i++)
+				{
+					velocity_packet.velocity[i] = sd->velocity[i];
+				}
+			
+				for (int i = 0; i < VELOCITY_SIZE; i++)
+				{
+					spi_tranceiver(velocity_packet.packet[i]);
+				}
+			
+				for(int i = 0; i < 3; i++)
+				{
+					sd->velocity[i] = 0;
+				}
 			}
 			break;
 		
@@ -492,11 +548,30 @@ ISR(ADC_vect)
 
 int main(void)
 {
+	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
+	
+	timer_1_start();
+	for(int i = 0; i < 100; i++)
+	{
+		get_acc(current_data);
+		get_angle(current_data);
+		//get_distance(current_data);
+	}
+	for(int i = 0; i < 3; i++)
+	{
+		current_data->acc[i] = 0.0;
+		current_data->angle[i] = 0.0;
+		//current_data->distance = 0.0;
+	}
+	led_blink_red(1);
+	timer_1_start();
+	
 	while(1) 
 	{
 		get_acc(current_data);
+		get_velocity(current_data);
 		get_angle(current_data);
 		get_distance(current_data);
 		get_temp(current_data);

@@ -16,15 +16,14 @@ Sensor_Data* create_empty_sensor(bool data)
 	sd_p->angle[1] = 0;
 	sd_p->angle[2] = 0;
 	sd_p->distance = 0;
-	/*
-	sd_p->distance[0] = 0;
-	sd_p->distance[1] = 0;
-	sd_p->distance[2] = 0;
-	*/
+	sd_p->velocity[0] = 0;
+	sd_p->velocity[1] = 0;
+	sd_p->velocity[2] = 0;
 	sd_p->has_data = data;
 	sd_p->has_ir = data;
 	sd_p->has_angle = data;
 	sd_p->has_acc = data;
+	sd_p->has_velocity = data;
 	sd_p->has_distance = data;
 	return sd_p;
 }

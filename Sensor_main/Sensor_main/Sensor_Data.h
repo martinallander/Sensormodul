@@ -14,6 +14,7 @@
 #define DISTANCE_SIZE 4
 //#define DISTANCE_SIZE 12
 #define ACC_SIZE 12
+#define VELOCITY_SIZE 12
 
 struct Sensor_Data
 {
@@ -21,12 +22,13 @@ struct Sensor_Data
 	float gyro[3];
 	float angle[3];
 	float distance;
-	//float distance[3];
+	float velocity[3];
 	float ir[64];
 	bool has_data;
 	bool has_ir;
 	bool has_angle;
 	bool has_acc;
+	bool has_velocity;
 	bool has_distance;
 }; typedef struct Sensor_Data Sensor_Data;
 
@@ -60,6 +62,12 @@ union Acc_packet
 	float acc[3];
 	unsigned char packet[ACC_SIZE];
 }; typedef union Acc_packet Acc_packet;
+
+union Velocity_packet
+{
+	float velocity[3];
+	unsigned char packet[VELOCITY_SIZE];
+}; typedef union Velocity_packet Velocity_packet;
 
 Sensor_Data* create_empty_sensor(bool data);
 
