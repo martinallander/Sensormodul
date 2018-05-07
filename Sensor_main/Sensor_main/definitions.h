@@ -33,7 +33,9 @@
 
 //Gyrometer registers
 #define gyro_addr 0xD6
-
+#define gyro_ctrl_reg1_adress 0x20
+#define gyro_ctrl_reg4_adress 0x23
+#define gyro_250dps_value 0b00000000             //Värde som ska skrivas till control register 4
 #define ctrl_reg_gyro_1 0x0F //default
 
 //Gyro sensitivities
@@ -59,6 +61,7 @@
 #define DISTANCE_DATA_REQUEST 0x04
 #define IR_DATA_REQUEST 0x05
 #define VELOCITY_DATA_REQUEST 0x06
+#define GYRO_DATA_REQUEST 0x07
 
 #define SPI_DATA_ERROR 0x10
 #define SPI_DATA_OK 0x11

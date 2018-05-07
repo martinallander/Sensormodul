@@ -21,7 +21,7 @@ float acc_time = 0.0;
 /*Variabler för avståndsmätaren*/
 
 volatile float distance_value;
-//volatile uint16_t digital_data;
+volatile uint16_t digital_data;
 
 bool data_sending = false;
 
@@ -48,6 +48,8 @@ void init_acc(void)
 void init_gyro(void)
 {
 	i2c_write_reg(gyro_addr, ctrl_reg_1, ctrl_reg_gyro_1, 1);
+	_delay_ms(10);
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg4_adress, gyro_250dps_value, 1);
 	_delay_ms(10);
 	return;
 }
@@ -111,8 +113,8 @@ void calibrate_acc()
 //Initierar och kalibrerar alla sensorer
 void init_sensors(void)
 {
-	init_temp();
- 	init_distance();
+	//init_temp();
+ 	//init_distance();
  	init_acc();
  	init_gyro();
  	calibrate_gyro();
@@ -126,12 +128,12 @@ void initialize_all(void)
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
 	i2c_init();
-	spi_init();
+	//spi_init();
 	sei();
 	init_sensors();
-	data_direction_init();
-	led_blink_yellow(1);
-	led_blink_green(1);
+	//data_direction_init();
+	//led_blink_yellow(1);
+	//led_blink_green(1);
 	timer_1_init(8.0);
 }
 
@@ -311,7 +313,7 @@ void get_gyro(Sensor_Data* sd)
 	
 	for(int i = 0; i < 3; i++)
 	{
-		if(sd->gyro[i] < 0.03)
+		if(abs(sd->gyro[i]) < 1.0)
 		{
 			sd->gyro[i] = 0.0;
 		}
@@ -334,6 +336,17 @@ void get_angle(Sensor_Data* sd)
 	timer_1_start();
 	return;
 }
+
+/*
+void get_angle(Sensor_Data* sd)
+{
+	get_gyro(sd);
+	sd->angle[0] += sd->gyro[0] / 95.0;
+	sd->angle[1] += sd->gyro[1] / 95.0;
+	sd->angle[2] += sd->gyro[2] / 95.0;
+	return;
+}
+*/
 
 void measure_distance(void)
 {
@@ -483,6 +496,23 @@ void send_data(Sensor_Data* sd)
 			}
 			break;
 			
+		case GYRO_DATA_REQUEST :
+			if(sd->has_acc)
+			{
+				spi_tranceiver(SPI_DATA_OK);
+				Gyro_packet gyro_packet;
+			
+				for(int i = 0; i < 3; i++)
+				{
+					gyro_packet.gyro[i] = sd->gyro[i];
+				}
+				for (int i = 0; i < GYRO_SIZE; i++)
+				{
+					spi_tranceiver(gyro_packet.packet[i]);
+				}
+			}
+			break;
+			
 		case ALL_DATA_REQUEST :
 			if(sd->has_data)
 			{
@@ -534,7 +564,7 @@ ISR(SPI_STC_vect)
 
 ISR(ADC_vect)
 {
-	uint16_t digital_data = (uint16_t)(ADCL | (ADCH << 8));
+	digital_data = (uint16_t)(ADCL | (ADCH << 8));
 	/*********************************************************
 						Vid kalibrering:
 	*********************************************************/
@@ -551,23 +581,8 @@ int main(void)
 	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
-	
-	timer_1_start();
-	for(int i = 0; i < 100; i++)
-	{
-		get_acc(current_data);
-		get_angle(current_data);
-		//get_distance(current_data);
-	}
-	for(int i = 0; i < 3; i++)
-	{
-		current_data->acc[i] = 0.0;
-		current_data->angle[i] = 0.0;
-		//current_data->distance = 0.0;
-	}
 	led_blink_red(1);
 	timer_1_start();
-	
 	while(1) 
 	{
 		get_acc(current_data);

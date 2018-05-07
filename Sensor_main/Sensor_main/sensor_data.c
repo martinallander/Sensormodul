@@ -25,6 +25,7 @@ Sensor_Data* create_empty_sensor(bool data)
 	sd_p->has_acc = data;
 	sd_p->has_velocity = data;
 	sd_p->has_distance = data;
+	sd_p->has_gyro = data;
 	return sd_p;
 }
 
