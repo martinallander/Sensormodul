@@ -125,15 +125,13 @@ void init_sensors(void)
 //Initierar I2C- och SPI-bussen samt sensorer, LEDs och timern
 void initialize_all(void)
 {
-	DDRB = (1 << DDB0);
-	PORTB = (0 << PORTB0);
 	i2c_init();
-	//spi_init();
+	spi_init();
 	sei();
 	init_sensors();
-	//data_direction_init();
-	//led_blink_yellow(1);
-	//led_blink_green(1);
+	data_direction_init();
+	led_blink_yellow(1);
+	led_blink_green(1);
 	timer_1_init(8.0);
 }
 
@@ -581,7 +579,9 @@ int main(void)
 	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
+	led_blink_red_2(1);
 	led_blink_red(1);
+	
 	timer_1_start();
 	while(1) 
 	{

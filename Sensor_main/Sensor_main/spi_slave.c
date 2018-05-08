@@ -23,5 +23,5 @@ unsigned char spi_tranceiver (unsigned char indata)
 
 void data_direction_init()
 {
-	DDRB = (1<<DDB0)|(1<<DDB1)|(1<<DDB2)|(1<<DDB6);			//Set PB0, PB1, PB2 and PB6 (MISO) as outputs
+	DDRB = (1<<DDB0)|(1<<DDB1)|(1<<DDB2)|(1<<DDB3)|(1<<DDB6);			//Set PB0, PB1, PB2 and PB6 (MISO) as outputs
 }
