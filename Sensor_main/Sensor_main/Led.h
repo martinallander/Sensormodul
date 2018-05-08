@@ -11,3 +11,5 @@ void led_blink_red (uint16_t i);
 void led_blink_green (uint16_t i);
 
 void led_blink_yellow (uint16_t i);
+
+void led_blink_red_2 (uint16_t i);
