@@ -19,6 +19,10 @@ Sensor_Data* create_empty_sensor(bool data)
 	sd_p->velocity[0] = 0;
 	sd_p->velocity[1] = 0;
 	sd_p->velocity[2] = 0;
+	for (int i = 0; i < 64; i++)
+	{
+		sd_p->ir[i] = 0.0;
+	}
 	sd_p->has_data = data;
 	sd_p->has_ir = data;
 	sd_p->has_angle = data;

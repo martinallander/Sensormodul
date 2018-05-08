@@ -113,8 +113,8 @@ void calibrate_acc()
 //Initierar och kalibrerar alla sensorer
 void init_sensors(void)
 {
-	//init_temp();
- 	//init_distance();
+	init_temp();
+ 	init_distance();
  	init_acc();
  	init_gyro();
  	calibrate_gyro();
@@ -128,12 +128,12 @@ void initialize_all(void)
 	DDRB = (1 << DDB0);
 	PORTB = (0 << PORTB0);
 	i2c_init();
-	//spi_init();
+	spi_init();
 	sei();
 	init_sensors();
-	//data_direction_init();
-	//led_blink_yellow(1);
-	//led_blink_green(1);
+	data_direction_init();
+	led_blink_yellow(1);
+	led_blink_green(1);
 	timer_1_init(8.0);
 }
 
@@ -171,11 +171,11 @@ float format_distance(uint16_t unformated_data)
 	//kalibrering v.1.2 avrundat
 	//float formated_data = (float)((10991)*(pow(unformated_data,-1.124)));
 	//kalibrering v. 1.3
-	float formated_data = (float)((7*pow(10,-9))*(pow(unformated_data,4)) +
+	float formated_data = (float)((7*pow(10,-9))*(pow(unformated_data,4)) + 
 									(-1*pow(10,-5)) * (pow(unformated_data,3)) +
-										(0.0056)*(pow(unformated_data,2)) +
-											(-1.4198)*unformated_data +
-												158.22);
+									 (0.0056)*(pow(unformated_data,2)) +
+									  (-1.4198)*unformated_data +
+									   158.22);
 	return formated_data;
 }
 /******************************************************************
@@ -348,17 +348,21 @@ void get_angle(Sensor_Data* sd)
 }
 */
 
-void measure_distance(void)
-{
-	ADCSRA |= (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
-	return;
-}
+//void measure_distance(void)
+//{
+	//ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
+	//return;
+//}
 
 void get_distance(Sensor_Data* sd)
 {
-	measure_distance();
-	_delay_ms(5);
-	sd->distance = (float)distance_value;
+	//measure_distance();
+	ADCSRA |= /*(1 << ADEN) |*/ (1 << ADSC) /*| (1 << ADIE)*/;
+	//_delay_ms(5);
+	while(ADCSRA & (1 << ADIF)){};
+	//distance_value = format_distance(digital_data);
+	sd->distance = distance_value;
+	//sd->distance = 13.37;
 	return;
 }
 
@@ -570,6 +574,7 @@ ISR(ADC_vect)
 	*********************************************************/
 	//Write_data_to_LCD(digital_data); 
 	/*------------------------------------------------------*/
+	//while(ADCSRA & (1 << ADIF))
 	distance_value = format_distance(digital_data);
 	//Write_data_to_LCD(distance); 
 	//_delay_ms(1);
@@ -581,6 +586,7 @@ int main(void)
 	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
+//	volatile float watch = 0.0;
 	led_blink_red(1);
 	timer_1_start();
 	while(1) 
@@ -588,8 +594,11 @@ int main(void)
 		get_acc(current_data);
 		get_velocity(current_data);
 		get_angle(current_data);
+
 		get_distance(current_data);
+	//	watch = current_data->distance;
 		get_temp(current_data);
+		
 	}
 	free(current_data);
 	return 0;
