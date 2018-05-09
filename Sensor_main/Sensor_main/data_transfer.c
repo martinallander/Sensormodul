@@ -40,16 +40,17 @@ void init_temp(void)
 //Sätter samplingshastigheten till 100 Hz
 void init_acc(void)
 {
-	i2c_write_reg(accel_addr, ctrl_reg_1, ctrl_reg_acc_100, 1);
+	i2c_write_reg(accel_addr, acc_ctrl_reg_1, ctrl_reg_acc_100, 1);
 	_delay_ms(10);
 	return;
 }
 
 void init_gyro(void)
 {
-	i2c_write_reg(gyro_addr, ctrl_reg_1, ctrl_reg_gyro_1, 1);
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, 0x00, 1); //reset
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, gyro_ctrl_reg_1_value, 1);
 	_delay_ms(10);
-	i2c_write_reg(gyro_addr, gyro_ctrl_reg4_adress, gyro_250dps_value, 1);
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, gyro_range_250dps, 1);
 	_delay_ms(10);
 	return;
 }
@@ -149,7 +150,8 @@ float format_acc(uint8_t low, uint8_t high)
 //Formaterar gyrometerdatan till grader/s
 float format_gyro(uint8_t low, uint8_t high)
 {
-	int16_t merged_data = (int16_t)(low + high*256);
+	//int16_t merged_data = (int16_t)(low + high*256);
+	int16_t merged_data = (int16_t)(low | (high << 8));
 	return (float)merged_data * L3GD20_SENSITIVITY_250DPS;
 }
 
@@ -291,19 +293,19 @@ void get_uncalibrated_gyro(Sensor_Data* sd)
 
 void get_gyro(Sensor_Data* sd)
 {
-	uint8_t x_l = i2c_read_reg(gyro_addr, acc_x_l, 1);
+	uint8_t x_l = i2c_read_reg(gyro_addr, gyro_x_l, 1);
 	_delay_ms(1);
-	uint8_t x_h = i2c_read_reg(gyro_addr, acc_x_h, 1);
+	uint8_t x_h = i2c_read_reg(gyro_addr, gyro_x_h, 1);
 	float data_x = format_gyro(x_l, x_h);
 		
-	uint8_t y_l = i2c_read_reg(gyro_addr, acc_y_l, 1);
+	uint8_t y_l = i2c_read_reg(gyro_addr, gyro_y_l, 1);
 	_delay_ms(1);
-	uint8_t y_h = i2c_read_reg(gyro_addr, acc_y_h, 1);
+	uint8_t y_h = i2c_read_reg(gyro_addr, gyro_y_h, 1);
 	float data_y = format_gyro(y_l, y_h);
 		
-	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+	uint8_t z_l = i2c_read_reg(gyro_addr, gyro_z_l, 1);
 	_delay_ms(1);
-	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+	uint8_t z_h = i2c_read_reg(gyro_addr, gyro_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
 	sd->gyro[0] = data_x - calibrated_gyro_x;
 	sd->gyro[1] = data_y - calibrated_gyro_y;
@@ -581,21 +583,22 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	_delay_ms(5000);							//Väntar på att roboten ska stå upp
+	//_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
-	
+	volatile float watch = 0.0;
 	timer_1_start();
 	while(1) 
 	{
-		get_acc(current_data);
-		get_velocity(current_data);
-		get_angle(current_data);
-
-		get_distance(current_data);
+	//	get_acc(current_data);
+	//	get_velocity(current_data);
+	//	get_angle(current_data);
+		get_gyro(current_data);
+		watch = current_data->gyro[0];
+		//get_distance(current_data);
 	//	watch = current_data->distance;
-		get_temp(current_data);
+		//get_temp(current_data);
 		
 	}
 	free(current_data);

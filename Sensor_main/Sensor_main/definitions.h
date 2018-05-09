@@ -18,7 +18,7 @@
 //Accelerometer registers
 #define accel_addr 0x32
 
-#define ctrl_reg_1 0x20
+#define acc_ctrl_reg_1 0x20
 #define acc_x_l 0x28
 #define acc_x_h 0x29
 #define acc_y_l 0x2A
@@ -33,10 +33,17 @@
 
 //Gyrometer registers
 #define gyro_addr 0xD6
-#define gyro_ctrl_reg1_adress 0x20
-#define gyro_ctrl_reg4_adress 0x23
-#define gyro_250dps_value 0b00000000             //Värde som ska skrivas till control register 4
-#define ctrl_reg_gyro_1 0x0F //default
+#define gyro_ctrl_reg_1 0x20
+#define gyro_ctrl_reg_4 0x23
+#define gyro_range_250dps 0x00             //Värde som ska skrivas till control register 4
+#define gyro_ctrl_reg_1_value 0x0F //default
+//samma som acc. Dock skönare att läsa så här
+#define gyro_x_l 0x28
+#define gyro_x_h 0x29
+#define gyro_y_l 0x2A
+#define gyro_y_h 0x2B
+#define gyro_z_l 0x2C
+#define gyro_z_h 0x2D
 
 //Gyro sensitivities
 #define L3GD20_SENSITIVITY_250DPS (0.00875F)      // Roughly 22/256 for fixed point match
