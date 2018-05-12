@@ -12,7 +12,7 @@ ISR(TIMER1_OVF_vect)
 void timer_1_init(float prescaler)
 {
 	//normal mode
-	TCCR1A |= (0 << WGM10)|(0 << WGM11)|(0 << WGM12);;
+	TCCR1A |= (0 << WGM10)|(0 << WGM11)|(0 << WGM12);	//Det är något skumt med timer asså´...
 	if (prescaler == 1.0)
 	{
 		TCCR1B |= (1 << CS00)|(0 << CS01)|(0 << CS02);

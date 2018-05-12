@@ -307,6 +307,7 @@ void get_gyro(Sensor_Data* sd)
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, gyro_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
+	
 	sd->gyro[0] = data_x - calibrated_gyro_x;
 	sd->gyro[1] = data_y - calibrated_gyro_y;
 	sd->gyro[2] = data_z - calibrated_gyro_z;
@@ -361,8 +362,8 @@ void get_distance(Sensor_Data* sd)
 	//_delay_ms(5);
 	while(ADCSRA & (1 << ADIF)){};
 	//distance_value = format_distance(digital_data);
-	sd->distance = distance_value;
-	//sd->distance = 13.37;
+	//sd->distance = distance_value;
+	sd->distance = 30.40;
 	return;
 }
 
@@ -583,22 +584,41 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	//_delay_ms(5000);							//Väntar på att roboten ska stå upp
+	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
-	volatile float watch = 0.0;
+	//volatile float watch_t = 0.0;
+	//volatile float watch_d = 0.0;
+	//volatile float watch_x = 0.0;
+	//volatile float watch_y = 0.0;
+	//volatile float watch_z = 0.0;
+	
+	
 	timer_1_start();
 	while(1) 
 	{
-	//	get_acc(current_data);
-	//	get_velocity(current_data);
-	//	get_angle(current_data);
-		get_gyro(current_data);
-		watch = current_data->gyro[0];
-		//get_distance(current_data);
-	//	watch = current_data->distance;
-		//get_temp(current_data);
+	/***********************************************************************
+	*************************Undersökning av timer_1************************
+	***********************************************************************/
+		//timer_1_start();
+		//_delay_ms(3000);
+		//watch_t = timer_1_get_time();
+	/*====================================================================*/
+		//get_acc(current_data);
+		//watch_t = timer_1_get_time();
+		get_velocity(current_data);
+	//	watch_t = timer_1_get_time();
+	//	get_gyro(current_data);
+	//	watch_t = timer_1_get_time();
+		get_angle(current_data);
+	//	watch_t = timer_1_get_time();
+		//watch_x = current_data->angle[0];
+		//watch_y = current_data->angle[1];
+	//	watch_z = current_data->angle[2];
+	//	get_distance(current_data);
+	//	watch_d = current_data->distance;
+		get_temp(current_data);
 		
 	}
 	free(current_data);
