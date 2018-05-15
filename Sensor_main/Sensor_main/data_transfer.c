@@ -51,11 +51,15 @@ void init_acc(void)
 
 void init_gyro(void)
 {
-	
+	/*==========================================================================
+	Kanske ska initiera FIFO med stream mode.
+	===========================================================================*/	
 	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, 0x00, 1); //reset
+//	i2c_write_reg(gyro_addr, gyro_ctrl_reg_5, 0x40, 1);
+	//i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x40, 1);
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, gyro_ctrl_reg_1_95_z, 1); // bara z-axeln
 	_delay_ms(10);
-	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, gyro_range_250dps, 1);
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, gyro_range_500dps, 1);
 	_delay_ms(10);
 	return;
 }
@@ -88,7 +92,7 @@ void calibrate_gyro()
 	calibrated_gyro_y = mean_y / 100.0;
 	calibrated_gyro_z = mean_z / 100.0;
 	free(sd_l);
-	_delay_ms(10);
+	_delay_ms(5);
 	return;
 }
 
@@ -101,7 +105,7 @@ void calibrate_gyro_2()
 	
 	for(int i = 0; i < 100; i++)
 	{
-		while(!gyro_data_avaliable())
+		while(!gyro_Zdata_avaliable())
 		{
 		}
 		get_uncalibrated_gyro_2(sd_l);
@@ -111,7 +115,7 @@ void calibrate_gyro_2()
 	gyro_z_mean = mean_z / 100.0;
 	gyro_z_stDev = sqrtf((squared_z/ 100.0) - powf(gyro_z_mean, 2));
 	free(sd_l);
-	_delay_ms(10);
+	_delay_ms(5);
 	return;
 }
 
@@ -180,7 +184,7 @@ float format_gyro(uint8_t low, uint8_t high)
 {
 	//int16_t merged_data = (int16_t)(low + high*256);
 	int16_t merged_data = (int16_t)(low | (high << 8));
-	return (float)merged_data * L3GD20_SENSITIVITY_250DPS;
+	return (float)merged_data * L3GD20_SENSITIVITY_500DPS;
 }
 
 //Formaterar IR-datan till grader celsius
@@ -294,7 +298,7 @@ void get_velocity(Sensor_Data* sd)
 	return;
 }
 
-bool gyro_data_avaliable(void)
+bool gyro_Zdata_avaliable(void)
 {
 	uint8_t data_status = i2c_read_reg(gyro_addr, gyro_status_reg, 1);
 	return ((data_status & 0x04) == 0x04);
@@ -335,8 +339,7 @@ void get_uncalibrated_gyro_2(Sensor_Data* sd)
 	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
-	//!!!!!!!!!!!!!!
-	volatile float data_z = format_gyro(z_l, z_h);
+	float data_z = format_gyro(z_l, z_h);
 	
 	sd->gyro[2] = data_z;
 	return;
@@ -378,54 +381,45 @@ void get_gyro(Sensor_Data* sd)
 	return;
 }
 
-//void get_gyro_2(Sensor_Data* sd)
-//{
-	//if(gyro_data_avaliable())
-	//{
-		//uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
-		//_delay_ms(1);
-		//uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
-		//float data_z = format_gyro(z_l, z_h);
-		//
-		//float cali_data_z = data_z - gyro_z_mean;
-//
-		//if ((cali_data_z <= -3 * gyro_z_stDev) || (cali_data_z => 3 * gyro_z_stDev))
-		//{
-			//sd->gyro[2] = cali_data_z;
-		//}
-	//}
-	//
-	//
-	//
-	//return;
-//}
 
-void get_angle_2(Sensor_Data* sd)
+void get_gyro_2(Sensor_Data* sd)
 {
-	if(gyro_data_avaliable())
-	{
-		uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
-		_delay_ms(1);
-		uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
-		float data_z = format_gyro(z_l, z_h);
-		
-		float cali_data_z = data_z - gyro_z_mean;
-
-		if ((cali_data_z <= -3 * gyro_z_stDev) || (cali_data_z >= 3 * gyro_z_stDev))
-		{
-			sd->angle[2] += cali_data_z / 95.0;
-		}
-	}
 	
+	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+	_delay_ms(1);
+	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+	float data_z = format_gyro(z_l, z_h);
+		
+	float cali_data_z = data_z - gyro_z_mean;
+	
+	if ((cali_data_z <= ((-3) * gyro_z_stDev)) || (cali_data_z >= (3 * gyro_z_stDev)))
+	{
+		sd->gyro[2] = cali_data_z;
+	}
+	/*==========================================================================
+	Antingen reboot memory content eller kanske bara lägga en else med sd->gyro[2] = 0?
+	==========================================================================*/
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_5, reboot_memory, 1); //reboot memory content, vet inte om det hjälper..
+	else
+	{
+		sd->gyro[2] = 0;
+	}
 	return;
 }
 
-//void get_angle_2(Sensor_Data* sd)
-//{
-	//get_gyro_2(sd);
-	//sd->angle[2] += (sd->gyro[2] / 95.0);
-	//return;
-//}
+void get_angle_2(Sensor_Data* sd)
+{
+	if(gyro_Zdata_avaliable())
+	{
+	get_gyro_2(sd);
+	sd->angle[2] += (sd->gyro[2] / 95.0);
+	}
+	//else if (sd->gyro[2] != 0.0)
+	//{
+		//sd->angle[2] += (sd->gyro[2] / 95.0);
+	//}
+	return;
+}
 
 //Integrerar vinkelhastigheten för att beräkna en vinkel
 void get_angle(Sensor_Data* sd)

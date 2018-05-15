@@ -39,6 +39,7 @@
 #define gyro_ctrl_reg_4 0x23
 #define gyro_ctrl_reg_5 0x25
 #define gyro_status_reg 0x27
+#define gyro_FIFO_ctrl_reg 0x2E
 
 //samma som acc. Dock skönare att läsa så här
 #define gyro_x_l 0x28
@@ -49,11 +50,15 @@
 #define gyro_z_h 0x2D
 
 //Gyro setup values
-#define gyro_range_250dps 0x00		//Värde som ska skrivas till control register 4
+#define gyro_range_250dps 0x00		//Värde som ska skrivas till control register 4 för 250dps
+#define gyro_range_500dps 0x10		//värde som ska skrivas till control register 4 för 500dps
 #define gyro_ctrl_reg_1_95 0x0F		//default 95 Hz, all axles
 #define gyro_ctrl_reg_1_95_z 0x0C	//95 Hz, only z-axle
 #define gyro_ctrl_reg_1_190 0x4F	//190 Hz, all axle
-#define reboot_memory 0x80			//value to be written to ctrl_reg5 to reboot memory  content
+#define gyro_ctrl_reg_1_190_z 0x4C	//190 Hz, only z-axle
+#define reboot_memory 0x80			//value to be written to ctrl_reg5 to reboot memory content
+//#define enable_FIFO_th1 0x40		//value to be written to ctrl_reg5 to enable FIFO 
+//#define set_FIFO_stream_th1 0x40	//value to be written to FIFO_ctrl_reg to set stream mode with threshold 1
 #define block_new_data 0x80			//value to be written to ctrl_reg4 to block new data until 
 									// dataregisters are read from. obs! ctrl_reg4 handles the dps-range
 //Gyro sensitivities

@@ -63,7 +63,7 @@ void calibrate_gyro();
 
 void calibrate_gyro_2();
 
-bool gyro_data_avaliable();
+bool gyro_Zdata_avaliable();
 
 void init_sensors(void);
 
