@@ -37,6 +37,13 @@ void init_temp(void)
 	return;
 }
 
+void init_temp_right(void)
+{
+	i2c_write_reg(temp_addr_2, frame_rate, 0x00, 1);
+	_delay_ms(10);
+	return;
+}
+
 //Sätter samplingshastigheten till 100 Hz
 void init_acc(void)
 {
@@ -115,11 +122,12 @@ void calibrate_acc()
 void init_sensors(void)
 {
 	init_temp();
- 	init_distance();
- 	init_acc();
- 	init_gyro();
- 	calibrate_gyro();
- 	calibrate_acc();
+	init_temp_right();
+ 	//init_distance();
+ 	//init_acc();
+ 	//init_gyro();
+ 	//calibrate_gyro();
+ 	//calibrate_acc();
  	return;
 }
 
@@ -191,6 +199,19 @@ void get_temp(Sensor_Data* sd)
 		temp_l = i2c_read_reg(temp_addr, start_pixel + 2*i, 1);
 		temp_h = i2c_read_reg(temp_addr, start_pixel + 2*i + 1, 1);
 		sd->ir[i] = format_temp(temp_l, temp_h);
+	}
+	return;
+}
+
+void get_temp_right(Sensor_Data* sd)
+{
+	uint8_t temp_l;
+	uint8_t temp_h;
+	for(int i = 0; i < 64; i++)
+	{
+		temp_l = i2c_read_reg(temp_addr_2, start_pixel + 2*i, 1);
+		temp_h = i2c_read_reg(temp_addr_2, start_pixel + 2*i + 1, 1);
+		sd->ir_right[i] = format_temp(temp_l, temp_h);
 	}
 	return;
 }
@@ -412,6 +433,22 @@ void send_data(Sensor_Data* sd)
 			}
 			break;
 		
+		case IR_RIGHT_DATA_REQUEST :
+			if(sd->has_ir_right)
+			{
+				spi_tranceiver(SPI_DATA_OK);
+				IR_packet ir_packet;
+				for(int i = 0; i < 64; i++)
+				{
+					ir_packet.ir[i] = sd->ir_right[i];
+				}
+				for (int i = 0; i < IR_SIZE; i++)
+				{
+					spi_tranceiver(ir_packet.packet[i]);
+				}
+			}
+			break;
+		
 		case ANGLE_DATA_REQUEST :
 			if(sd->has_angle)
 			{
@@ -584,7 +621,7 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	_delay_ms(5000);							//Väntar på att roboten ska stå upp
+	//_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
@@ -593,8 +630,6 @@ int main(void)
 	//volatile float watch_x = 0.0;
 	//volatile float watch_y = 0.0;
 	//volatile float watch_z = 0.0;
-	
-	
 	timer_1_start();
 	while(1) 
 	{
@@ -607,11 +642,11 @@ int main(void)
 	/*====================================================================*/
 		//get_acc(current_data);
 		//watch_t = timer_1_get_time();
-		get_velocity(current_data);
+	//	get_acc(current_data);
 	//	watch_t = timer_1_get_time();
 	//	get_gyro(current_data);
 	//	watch_t = timer_1_get_time();
-		get_angle(current_data);
+	//	get_angle(current_data);
 	//	watch_t = timer_1_get_time();
 		//watch_x = current_data->angle[0];
 		//watch_y = current_data->angle[1];
@@ -619,6 +654,7 @@ int main(void)
 	//	get_distance(current_data);
 	//	watch_d = current_data->distance;
 		get_temp(current_data);
+		get_temp_right(current_data);
 		
 	}
 	free(current_data);

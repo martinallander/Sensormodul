@@ -25,8 +25,10 @@ struct Sensor_Data
 	float distance;
 	float velocity[3];
 	float ir[64];
+	float ir_right[64];
 	bool has_data;
 	bool has_ir;
+	bool has_ir_right;
 	bool has_angle;
 	bool has_acc;
 	bool has_velocity;

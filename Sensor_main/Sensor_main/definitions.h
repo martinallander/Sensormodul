@@ -53,6 +53,7 @@
 
 //IR registers
 #define temp_addr 0xD2
+#define temp_addr_2 0xD0
 #define start_pixel 0x80 //Lowbyte för första pixeln (nr 0)
 #define end_pixel 0xFE	//Lowbyte för sista pixeln (nr 63)
 #define frame_rate 0x02
@@ -69,6 +70,7 @@
 #define IR_DATA_REQUEST 0x05
 #define VELOCITY_DATA_REQUEST 0x06
 #define GYRO_DATA_REQUEST 0x07
+#define IR_RIGHT_DATA_REQUEST 0x08
 
 #define SPI_DATA_ERROR 0x10
 #define SPI_DATA_OK 0x11
