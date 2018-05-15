@@ -9,6 +9,9 @@ float calibrated_gyro_x = 0.0;
 float calibrated_gyro_y = 0.0;
 float calibrated_gyro_z = 0.0;
 
+float gyro_z_mean = 0.0;
+float gyro_z_stDev = 0.0;
+
 float calibrated_acc_x = 0.0;
 float calibrated_acc_y = 0.0;
 float calibrated_acc_z = 0.0;
@@ -22,6 +25,7 @@ float acc_time = 0.0;
 
 volatile float distance_value;
 volatile uint16_t digital_data;
+
 
 bool data_sending = false;
 
@@ -47,8 +51,9 @@ void init_acc(void)
 
 void init_gyro(void)
 {
+	
 	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, 0x00, 1); //reset
-	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, gyro_ctrl_reg_1_value, 1);
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, gyro_ctrl_reg_1_95_z, 1); // bara z-axeln
 	_delay_ms(10);
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, gyro_range_250dps, 1);
 	_delay_ms(10);
@@ -87,6 +92,29 @@ void calibrate_gyro()
 	return;
 }
 
+
+void calibrate_gyro_2()
+{
+	Sensor_Data* sd_l = create_empty_sensor(true);
+	float mean_z = 0.0;
+	float squared_z = 0.0;
+	
+	for(int i = 0; i < 100; i++)
+	{
+		while(!gyro_data_avaliable())
+		{
+		}
+		get_uncalibrated_gyro_2(sd_l);
+		mean_z += sd_l->gyro[2];
+		squared_z += powf(sd_l->gyro[2], 2);
+	}
+	gyro_z_mean = mean_z / 100.0;
+	gyro_z_stDev = sqrtf((squared_z/ 100.0) - powf(gyro_z_mean, 2));
+	free(sd_l);
+	_delay_ms(10);
+	return;
+}
+
 //Gör 100 mätningar och beräknar medelvärdet
 void calibrate_acc()
 {
@@ -118,7 +146,7 @@ void init_sensors(void)
  	init_distance();
  	init_acc();
  	init_gyro();
- 	calibrate_gyro();
+ 	calibrate_gyro_2();
  	calibrate_acc();
  	return;
 }
@@ -266,48 +294,76 @@ void get_velocity(Sensor_Data* sd)
 	return;
 }
 
+bool gyro_data_avaliable(void)
+{
+	uint8_t data_status = i2c_read_reg(gyro_addr, gyro_status_reg, 1);
+	return ((data_status & 0x04) == 0x04);
+}
+
 
 //Används enbart till att kalibrera gyrometern
 void get_uncalibrated_gyro(Sensor_Data* sd)
 {
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t x_l = i2c_read_reg(gyro_addr, acc_x_l, 1);
 	_delay_ms(1);
 	uint8_t x_h = i2c_read_reg(gyro_addr, acc_x_h, 1);
 	float data_x = format_gyro(x_l, x_h);
-	
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t y_l = i2c_read_reg(gyro_addr, acc_y_l, 1);
 	_delay_ms(1);
 	uint8_t y_h = i2c_read_reg(gyro_addr, acc_y_h, 1);
 	float data_y = format_gyro(y_l, y_h);
-	
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
 	
+	/*
+	Måste jag ta återställa ctrl_reg4 till 0x00??
+	*/
 	sd->gyro[0] = data_x;
 	sd->gyro[1] = data_y;
 	sd->gyro[2] = data_z;
 	return;
 }
 
+void get_uncalibrated_gyro_2(Sensor_Data* sd)
+{
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
+	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+	_delay_ms(1);
+	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+	//!!!!!!!!!!!!!!
+	volatile float data_z = format_gyro(z_l, z_h);
+	
+	sd->gyro[2] = data_z;
+	return;
+}
+
+
 void get_gyro(Sensor_Data* sd)
 {
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t x_l = i2c_read_reg(gyro_addr, gyro_x_l, 1);
 	_delay_ms(1);
 	uint8_t x_h = i2c_read_reg(gyro_addr, gyro_x_h, 1);
 	float data_x = format_gyro(x_l, x_h);
-		
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t y_l = i2c_read_reg(gyro_addr, gyro_y_l, 1);
 	_delay_ms(1);
 	uint8_t y_h = i2c_read_reg(gyro_addr, gyro_y_h, 1);
 	float data_y = format_gyro(y_l, y_h);
-		
+	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data, 1);
 	uint8_t z_l = i2c_read_reg(gyro_addr, gyro_z_l, 1);
 	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, gyro_z_h, 1);
 	float data_z = format_gyro(z_l, z_h);
 	
+	/*
+	Måste jag ta återställa ctrl_reg4 till 0x00??
+	*/
 	sd->gyro[0] = data_x - calibrated_gyro_x;
 	sd->gyro[1] = data_y - calibrated_gyro_y;
 	sd->gyro[2] = data_z - calibrated_gyro_z;
@@ -322,15 +378,81 @@ void get_gyro(Sensor_Data* sd)
 	return;
 }
 
+//void get_gyro_2(Sensor_Data* sd)
+//{
+	//if(gyro_data_avaliable())
+	//{
+		//uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+		//_delay_ms(1);
+		//uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+		//float data_z = format_gyro(z_l, z_h);
+		//
+		//float cali_data_z = data_z - gyro_z_mean;
+//
+		//if ((cali_data_z <= -3 * gyro_z_stDev) || (cali_data_z => 3 * gyro_z_stDev))
+		//{
+			//sd->gyro[2] = cali_data_z;
+		//}
+	//}
+	//
+	//
+	//
+	//return;
+//}
+
+void get_angle_2(Sensor_Data* sd)
+{
+	if(gyro_data_avaliable())
+	{
+		uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+		_delay_ms(1);
+		uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+		float data_z = format_gyro(z_l, z_h);
+		
+		float cali_data_z = data_z - gyro_z_mean;
+
+		if ((cali_data_z <= -3 * gyro_z_stDev) || (cali_data_z >= 3 * gyro_z_stDev))
+		{
+			sd->angle[2] += cali_data_z / 95.0;
+		}
+	}
+	
+	return;
+}
+
+//void get_angle_2(Sensor_Data* sd)
+//{
+	//get_gyro_2(sd);
+	//sd->angle[2] += (sd->gyro[2] / 95.0);
+	//return;
+//}
+
 //Integrerar vinkelhastigheten för att beräkna en vinkel
 void get_angle(Sensor_Data* sd)
 {
-	get_gyro(sd);
-	gyro_time += timer_1_get_time();
 	
-	sd->angle[0] += (sd->gyro[0] * gyro_time);
-	sd->angle[1] += (sd->gyro[1] * gyro_time);
+	while(!(i2c_read_reg(gyro_addr,gyro_status_reg,1) & (0x04))){};
+	timer_1_start();
+	while(!(i2c_read_reg(gyro_addr,gyro_status_reg,1) & (0x04))){};
+		gyro_time +=timer_1_get_time();
+		i2c_write_reg(gyro_addr,gyro_ctrl_reg_4,block_new_data,1);
+	
+	//while(!(i2c_read_reg(gyro_addr,gyro_status_reg,1) & (0x04))){};
+		//i2c_write_reg(gyro_addr,gyro_ctrl_reg_4,block_new_data,1);
+		get_gyro(sd);
+	//gyro_time += timer_1_get_time();
+	
+	//sd->angle[0] += (sd->gyro[0] * gyro_time);
+	//sd->angle[1] += (sd->gyro[1] * gyro_time);
 	sd->angle[2] += (sd->gyro[2] * gyro_time);
+	
+	//sd->angle[0] += (sd->gyro[0] * gyro_time/95);
+	//sd->angle[1] += (sd->gyro[1] * gyro_time/95);
+	//sd->angle[2] += (sd->gyro[2] * gyro_time/95);
+	
+	//sd->angle[0] += (sd->gyro[0]/95);
+	//sd->angle[1] += (sd->gyro[1]/95);
+	//sd->angle[2] += (sd->gyro[2]/95);
 	
 	acc_time += gyro_time;
 	gyro_time = 0.0;
@@ -338,16 +460,16 @@ void get_angle(Sensor_Data* sd)
 	return;
 }
 
-/*
-void get_angle(Sensor_Data* sd)
-{
-	get_gyro(sd);
-	sd->angle[0] += sd->gyro[0] / 95.0;
-	sd->angle[1] += sd->gyro[1] / 95.0;
-	sd->angle[2] += sd->gyro[2] / 95.0;
-	return;
-}
-*/
+
+//void get_angle(Sensor_Data* sd)
+//{
+	//get_gyro(sd);
+	//sd->angle[0] += sd->gyro[0] / 95.0;
+	//sd->angle[1] += sd->gyro[1] / 95.0;
+	//sd->angle[2] += sd->gyro[2] / 95.0;
+	//return;
+//}
+
 
 //void measure_distance(void)
 //{
@@ -362,8 +484,8 @@ void get_distance(Sensor_Data* sd)
 	//_delay_ms(5);
 	while(ADCSRA & (1 << ADIF)){};
 	//distance_value = format_distance(digital_data);
-	//sd->distance = distance_value;
-	sd->distance = 30.40;
+	sd->distance = distance_value;
+	//sd->distance = 30.40;
 	return;
 }
 
@@ -584,7 +706,7 @@ ISR(ADC_vect)
 
 int main(void)
 {
-	_delay_ms(5000);							//Väntar på att roboten ska stå upp
+	//_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
@@ -592,10 +714,11 @@ int main(void)
 	//volatile float watch_d = 0.0;
 	//volatile float watch_x = 0.0;
 	//volatile float watch_y = 0.0;
-	//volatile float watch_z = 0.0;
+	volatile float watch_z = 0.0;
+	volatile float watch_zg = 0.0;
 	
 	
-	timer_1_start();
+	//timer_1_start();
 	while(1) 
 	{
 	/***********************************************************************
@@ -605,20 +728,18 @@ int main(void)
 		//_delay_ms(3000);
 		//watch_t = timer_1_get_time();
 	/*====================================================================*/
-		//get_acc(current_data);
-		//watch_t = timer_1_get_time();
+	//	timer_1_start();
+	//	get_acc(current_data);
 		get_velocity(current_data);
-	//	watch_t = timer_1_get_time();
 	//	get_gyro(current_data);
-	//	watch_t = timer_1_get_time();
-		get_angle(current_data);
-	//	watch_t = timer_1_get_time();
+		get_angle_2(current_data);
 		//watch_x = current_data->angle[0];
 		//watch_y = current_data->angle[1];
-	//	watch_z = current_data->angle[2];
-	//	get_distance(current_data);
-	//	watch_d = current_data->distance;
-		get_temp(current_data);
+		watch_z = current_data->angle[2];
+		//watch_zg = current_data->gyro[2];
+		//get_distance(current_data);
+		//get_temp(current_data);
+	//	watch_t = gyro_time + timer_1_get_time();
 		
 	}
 	free(current_data);

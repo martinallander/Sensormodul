@@ -25,6 +25,8 @@
 #define acc_y_h 0x2B
 #define acc_z_l 0x2C
 #define acc_z_h 0x2D
+
+//accelerometer seetup values
 #define ctrl_reg_acc_10 = 0b00100111 //10Hz
 #define ctrl_reg_acc_50 0b01000111 //50Hz
 #define ctrl_reg_acc_100 0b01010111 //100Hz
@@ -32,11 +34,12 @@
 #define gravity_value 9.821f
 
 //Gyrometer registers
-#define gyro_addr 0xD6
+#define gyro_addr 0xD6 // 11010110
 #define gyro_ctrl_reg_1 0x20
 #define gyro_ctrl_reg_4 0x23
-#define gyro_range_250dps 0x00             //Värde som ska skrivas till control register 4
-#define gyro_ctrl_reg_1_value 0x0F //default
+#define gyro_ctrl_reg_5 0x25
+#define gyro_status_reg 0x27
+
 //samma som acc. Dock skönare att läsa så här
 #define gyro_x_l 0x28
 #define gyro_x_h 0x29
@@ -45,6 +48,14 @@
 #define gyro_z_l 0x2C
 #define gyro_z_h 0x2D
 
+//Gyro setup values
+#define gyro_range_250dps 0x00		//Värde som ska skrivas till control register 4
+#define gyro_ctrl_reg_1_95 0x0F		//default 95 Hz, all axles
+#define gyro_ctrl_reg_1_95_z 0x0C	//95 Hz, only z-axle
+#define gyro_ctrl_reg_1_190 0x4F	//190 Hz, all axle
+#define reboot_memory 0x80			//value to be written to ctrl_reg5 to reboot memory  content
+#define block_new_data 0x80			//value to be written to ctrl_reg4 to block new data until 
+									// dataregisters are read from. obs! ctrl_reg4 handles the dps-range
 //Gyro sensitivities
 #define L3GD20_SENSITIVITY_250DPS (0.00875F)      // Roughly 22/256 for fixed point match
 #define L3GD20_SENSITIVITY_500DPS (0.0175F)       // Roughly 45/256

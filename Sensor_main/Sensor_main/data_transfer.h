@@ -43,7 +43,11 @@ void get_acc(Sensor_Data* sd);
 
 void get_gyro(Sensor_Data* sd);
 
+void get_gyro_2(Sensor_Data* sd);
+
 void get_angle(Sensor_Data* sd);
+
+void get_angle_2(Sensor_Data* sd);
 
 void get_velocity(Sensor_Data* sd);
 
@@ -51,9 +55,15 @@ void get_distance(Sensor_Data* sd);
 
 void get_uncalibrated_gyro(Sensor_Data* sd);
 
+void get_uncalibrated_gyro_2(Sensor_Data* sd);
+
 void get_uncalibrated_acc(Sensor_Data* sd);
 
 void calibrate_gyro();
+
+void calibrate_gyro_2();
+
+bool gyro_data_avaliable();
 
 void init_sensors(void);
 
