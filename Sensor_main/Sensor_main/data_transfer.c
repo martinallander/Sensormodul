@@ -123,11 +123,11 @@ void init_sensors(void)
 {
 	init_temp();
 	init_temp_right();
- 	//init_distance();
- 	//init_acc();
- 	//init_gyro();
- 	//calibrate_gyro();
- 	//calibrate_acc();
+ 	init_distance();
+ 	init_acc();
+ 	init_gyro();
+ 	calibrate_gyro();
+ 	calibrate_acc();
  	return;
 }
 
@@ -383,8 +383,8 @@ void get_distance(Sensor_Data* sd)
 	//_delay_ms(5);
 	while(ADCSRA & (1 << ADIF)){};
 	//distance_value = format_distance(digital_data);
-	//sd->distance = distance_value;
-	sd->distance = 30.40;
+	sd->distance = distance_value;
+	//sd->distance = 30.40;
 	return;
 }
 
@@ -626,7 +626,7 @@ int main(void)
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
 	//volatile float watch_t = 0.0;
-	//volatile float watch_d = 0.0;
+	volatile float watch_d = 0.0;
 	//volatile float watch_x = 0.0;
 	//volatile float watch_y = 0.0;
 	//volatile float watch_z = 0.0;
@@ -640,19 +640,19 @@ int main(void)
 		//_delay_ms(3000);
 		//watch_t = timer_1_get_time();
 	/*====================================================================*/
-		//get_acc(current_data);
+		get_acc(current_data);
 		//watch_t = timer_1_get_time();
-	//	get_acc(current_data);
+	//	get_velocity(current_data);
 	//	watch_t = timer_1_get_time();
 	//	get_gyro(current_data);
 	//	watch_t = timer_1_get_time();
-	//	get_angle(current_data);
+		get_angle(current_data);
 	//	watch_t = timer_1_get_time();
 		//watch_x = current_data->angle[0];
 		//watch_y = current_data->angle[1];
 	//	watch_z = current_data->angle[2];
-	//	get_distance(current_data);
-	//	watch_d = current_data->distance;
+		get_distance(current_data);
+		watch_d = current_data->distance;
 		get_temp(current_data);
 		get_temp_right(current_data);
 		
