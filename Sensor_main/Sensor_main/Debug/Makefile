@@ -39,6 +39,7 @@ SUBDIRS :=
 C_SRCS +=  \
 ../FIFO_Queue.c \
 ../i2c.c \
+../lcd.c \
 ../led.c \
 ../main.c \
 ../sensor_data.c \
@@ -56,6 +57,7 @@ ASM_SRCS +=
 OBJS +=  \
 FIFO_Queue.o \
 i2c.o \
+lcd.o \
 led.o \
 main.o \
 sensor_data.o \
@@ -66,6 +68,7 @@ timer.o
 OBJS_AS_ARGS +=  \
 FIFO_Queue.o \
 i2c.o \
+lcd.o \
 led.o \
 main.o \
 sensor_data.o \
@@ -76,6 +79,7 @@ timer.o
 C_DEPS +=  \
 FIFO_Queue.d \
 i2c.d \
+lcd.d \
 led.d \
 main.d \
 sensor_data.d \
@@ -86,6 +90,7 @@ timer.d
 C_DEPS_AS_ARGS +=  \
 FIFO_Queue.d \
 i2c.d \
+lcd.d \
 led.d \
 main.d \
 sensor_data.d \
@@ -107,6 +112,8 @@ LINKER_SCRIPT_DEP+=
 
 
 # AVR32/GNU C Compiler
+
+
 
 
 

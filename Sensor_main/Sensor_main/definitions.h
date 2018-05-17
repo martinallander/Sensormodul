@@ -59,8 +59,10 @@
 #define reboot_memory 0x80			//value to be written to ctrl_reg5 to reboot memory content
 //#define enable_FIFO_th1 0x40		//value to be written to ctrl_reg5 to enable FIFO 
 //#define set_FIFO_stream_th1 0x40	//value to be written to FIFO_ctrl_reg to set stream mode with threshold 1
-#define block_new_data 0x80			//value to be written to ctrl_reg4 to block new data until 
-									// dataregisters are read from. obs! ctrl_reg4 handles the dps-range
+#define block_new_data_250dps 0x80	//value to be written to ctrl_reg4 to block new data until 
+									// dataregisters are read from at 250dps. obs! ctrl_reg4 handles the dps-range
+#define block_new_data_500dps 0x90	//value  to be written to ctrl_reg4 to block new data until 
+									// dataregisters are read from at 500dps. obs! ctrl_reg4 handles the dps-range
 //Gyro sensitivities
 #define L3GD20_SENSITIVITY_250DPS (0.00875F)      // Roughly 22/256 for fixed point match
 #define L3GD20_SENSITIVITY_500DPS (0.0175F)       // Roughly 45/256

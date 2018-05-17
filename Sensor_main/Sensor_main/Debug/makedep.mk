@@ -6,6 +6,8 @@ FIFO_Queue.c
 
 i2c.c
 
+lcd.c
+
 led.c
 
 main.c

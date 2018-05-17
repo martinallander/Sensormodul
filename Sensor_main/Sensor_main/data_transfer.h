@@ -18,6 +18,7 @@
 #include "led.h"
 #include "timer.h"
 #include "sensor_data.h"
+#include "lcd.h"
 
 float format_acc(uint8_t low, uint8_t high);
 
