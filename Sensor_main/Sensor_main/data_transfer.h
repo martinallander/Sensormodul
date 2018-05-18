@@ -66,6 +66,16 @@ void calibrate_gyro_2();
 
 bool gyro_Zdata_avaliable();
 
+/*-------------------------------------------
+			gyro FIFO functions
+--------------------------------------------*/
+
+bool gyro_FIFO_full(void);
+
+int get_FIFO_depth(void);
+
+void reset_FIFO(void);
+
 void init_sensors(void);
 
 void initialize_all(void);

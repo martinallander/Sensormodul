@@ -35,11 +35,12 @@
 
 //Gyrometer registers
 #define gyro_addr 0xD6 // 11010110
-#define gyro_ctrl_reg_1 0x20
-#define gyro_ctrl_reg_4 0x23
-#define gyro_ctrl_reg_5 0x25
-#define gyro_status_reg 0x27
-#define gyro_FIFO_ctrl_reg 0x2E
+#define gyro_ctrl_reg_1		0x20
+#define gyro_ctrl_reg_4		0x23
+#define gyro_ctrl_reg_5		0x25
+#define gyro_status_reg		0x27
+#define gyro_FIFO_ctrl_reg	0x2E
+#define gyro_FIFO_src_reg	0x2F
 
 //samma som acc. Dock skönare att läsa så här
 #define gyro_x_l 0x28

@@ -55,16 +55,21 @@ void init_acc(void)
 void init_gyro(void)
 {
 	/*==========================================================================
-	Kanske ska initiera FIFO med stream mode.
+							setup Gyro and FIFO
+	----------------------------------------------------------------------------
+	Remember the watermark
 	===========================================================================*/	
-	//i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, 0x00, 1); //reset
+	
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, gyro_range_250dps, 1);
-	_delay_ms(10);
-	i2c_write_reg(gyro_addr, gyro_ctrl_reg_5, 0x40, 1);
-	i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x5F, 1); //set FIFO-mode to stream and th:31
+	_delay_ms(1);
+	i2c_write_reg(gyro_addr, gyro_ctrl_reg_5, 0x40, 1); //enable FIFO:n
+	_delay_ms(1);
+	i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x00, 1); //set FIFO-mode to bypass
+	_delay_ms(1);
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, 0x00, 1); //reset
+	_delay_ms(1);
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_1, gyro_ctrl_reg_1_190_z, 1); // bara z-axeln
-	_delay_ms(10);
+	_delay_ms(1);
 	return;
 }
 
@@ -156,6 +161,8 @@ void init_sensors(void)
  	init_acc();
  	init_gyro();
  	calibrate_gyro_2();
+	//i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x5F, 1); //set FIFO-mode to stream and th:32
+	i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x3F, 1); //set FIFO-mode to FIFO and th:32
  	calibrate_acc();
  	return;
 }
@@ -309,6 +316,25 @@ bool gyro_Zdata_avaliable(void)
 	return ((data_status & 0x04) == 0x04);
 }
 
+bool gyro_FIFO_full(void)
+{
+	uint8_t fifo_status = i2c_read_reg(gyro_addr, gyro_FIFO_src_reg, 1);
+	return ((fifo_status & 0x40) == 0x40);
+}
+
+int get_FIFO_depth(void)
+{
+	uint8_t fifo_status =i2c_read_reg(gyro_addr, gyro_FIFO_src_reg, 1);
+	uint8_t depth = (fifo_status & 0x1F);
+	return depth;
+}
+
+void reset_FIFO()
+{
+	i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x00, 1); //set to bypass
+	i2c_write_reg(gyro_addr, gyro_FIFO_ctrl_reg, 0x3F, 1); // set t
+	return;
+}
 
 //Används enbart till att kalibrera gyrometern
 //void get_uncalibrated_gyro(Sensor_Data* sd)
@@ -347,9 +373,9 @@ void get_uncalibrated_gyro_2(Sensor_Data* sd)
 		data_override += 1;
 	}
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data_250dps, 1);
-	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
-	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+	_delay_ms(1);
+	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
 	float data_z = format_gyro(z_l, z_h);
 	
 	sd->gyro[2] = data_z;
@@ -402,9 +428,10 @@ void get_gyro_2(Sensor_Data* sd)
 		//data_override += 1;
 	//}
 	i2c_write_reg(gyro_addr, gyro_ctrl_reg_4, block_new_data_250dps, 1);
-	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
-	_delay_ms(1);
 	uint8_t z_h = i2c_read_reg(gyro_addr, acc_z_h, 1);
+	_delay_ms(1);
+	uint8_t z_l = i2c_read_reg(gyro_addr, acc_z_l, 1);
+
 	float data_z = format_gyro(z_l, z_h);
 		
 	float cali_data_z = data_z - gyro_z_mean;
