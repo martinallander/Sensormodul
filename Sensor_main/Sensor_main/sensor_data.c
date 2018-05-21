@@ -2,6 +2,7 @@
 
 Sensor_Data* sd;
 
+//skapar en pekare som pekar på en array av all sensordata
 Sensor_Data* create_empty_sensor(bool data)
 {
 	Sensor_Data sd;

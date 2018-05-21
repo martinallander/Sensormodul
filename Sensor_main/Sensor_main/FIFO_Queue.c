@@ -4,7 +4,7 @@
 #include "FIFO_Queue.h"
 
 
-
+//Skapar en tom FIFO
 FIFO* create_empty_FIFO()
 {
 	FIFO f;
@@ -29,7 +29,8 @@ bool is_full(FIFO f)
 {
 	return (f.length==MAX_SIZE);
 }
-	
+
+//Lägger till data i slutet av FIFO:n
 void enqueue(FIFO* f, Sensor_Data data)
 {
 	if(!is_full(*f))

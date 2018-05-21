@@ -170,15 +170,9 @@ float format_temp(uint8_t low, uint8_t high)
 	return (float)merged_data * AMG8833_RESOLUTION;
 }
 
+//Formaterar digitala mätvärden till centimeter
 float format_distance(uint16_t unformated_data)
 {
-	//kalibrering v.1.0
-	//float formated_data = (float)((18265)*(pow(unformated_data,-1.226)));
-	//Kalibrering v.1.1
-	//float formated_data = (float)((10879)*(pow(unformated_data,-1.122)));
-	//kalibrering v.1.2 avrundat
-	//float formated_data = (float)((10991)*(pow(unformated_data,-1.124)));
-	//kalibrering v. 1.3
 	float formated_data = (float)((7*pow(10,-9))*(pow(unformated_data,4)) + 
 									(-1*pow(10,-5)) * (pow(unformated_data,3)) +
 									 (0.0056)*(pow(unformated_data,2)) +
@@ -190,6 +184,7 @@ float format_distance(uint16_t unformated_data)
 ******************** GET SENSOR DATA FUNCTIONS ********************
 ******************************************************************/
 
+//hämtar ir-data från framkameran
 void get_temp(Sensor_Data* sd)
 {
 	uint8_t temp_l;
@@ -203,6 +198,7 @@ void get_temp(Sensor_Data* sd)
 	return;
 }
 
+//hämtar ir-data från högerkameran
 void get_temp_right(Sensor_Data* sd)
 {
 	uint8_t temp_l;
@@ -240,6 +236,7 @@ void get_uncalibrated_acc(Sensor_Data* sd)
 	return;
 }
 
+//hämtar accelerometerdata
 void get_acc(Sensor_Data* sd)
 {
 	uint8_t x_l = i2c_read_reg(accel_addr, acc_x_l, 1);
@@ -312,6 +309,7 @@ void get_uncalibrated_gyro(Sensor_Data* sd)
 	return;
 }
 
+//hämtar gyrodata
 void get_gyro(Sensor_Data* sd)
 {
 	uint8_t x_l = i2c_read_reg(gyro_addr, gyro_x_l, 1);
@@ -359,32 +357,12 @@ void get_angle(Sensor_Data* sd)
 	return;
 }
 
-/*
-void get_angle(Sensor_Data* sd)
-{
-	get_gyro(sd);
-	sd->angle[0] += sd->gyro[0] / 95.0;
-	sd->angle[1] += sd->gyro[1] / 95.0;
-	sd->angle[2] += sd->gyro[2] / 95.0;
-	return;
-}
-*/
-
-//void measure_distance(void)
-//{
-	//ADCSRA = (1 << ADEN) | (1 << ADSC) | (1 << ADIE);
-	//return;
-//}
-
+//startar AD-omvandlingen och väntar på avbrottet
 void get_distance(Sensor_Data* sd)
 {
-	//measure_distance();
-	ADCSRA |= /*(1 << ADEN) |*/ (1 << ADSC) /*| (1 << ADIE)*/;
-	//_delay_ms(5);
+	ADCSRA |= (1 << ADSC);
 	while(ADCSRA & (1 << ADIF)){};
-	//distance_value = format_distance(digital_data);
 	sd->distance = distance_value;
-	//sd->distance = 30.40;
 	return;
 }
 
@@ -411,6 +389,7 @@ void get_distance(Sensor_Data* sd)
 ************************** SPI FUNCTIONS **************************
 ******************************************************************/
 
+//hanterar dataöverföringen via SPI:n
 void send_data(Sensor_Data* sd)
 {
 	unsigned char data = 0;
@@ -506,14 +485,7 @@ void send_data(Sensor_Data* sd)
 				Distance_packet distance_packet;
 				
 				distance_packet.distance = sd->distance;
-				
-				/*
-				for(int i = 0; i < 3; i++)
-				{
-					distance_packet.distance[i] = sd->distance[i];
-				}
-				*/
-				
+								
 				for (int i = 0; i < DISTANCE_SIZE; i++)
 				{
 					spi_tranceiver(distance_packet.packet[i]);
@@ -604,55 +576,27 @@ ISR(SPI_STC_vect)
 	}
 }
 
+//Avbrottsrutin som avläser digitaldata och anropar omvandling till centimeter
 ISR(ADC_vect)
 {
 	digital_data = (uint16_t)(ADCL | (ADCH << 8));
-	/*********************************************************
-						Vid kalibrering:
-	*********************************************************/
-	//Write_data_to_LCD(digital_data); 
-	/*------------------------------------------------------*/
-	//while(ADCSRA & (1 << ADIF))
 	distance_value = format_distance(digital_data);
-	//Write_data_to_LCD(distance); 
-	//_delay_ms(1);
-	//ADCSRA = (0 << ADEN) | (0 << ADIE);
 }
 
 int main(void)
 {
-	//_delay_ms(5000);							//Väntar på att roboten ska stå upp
+	_delay_ms(5000);							//Väntar på att roboten ska stå upp
 	initialize_all();
 	current_data = create_empty_sensor(true);
 	led_blink_red(1);
-	//volatile float watch_t = 0.0;
-	volatile float watch_d = 0.0;
-	//volatile float watch_x = 0.0;
-	//volatile float watch_y = 0.0;
-	//volatile float watch_z = 0.0;
 	timer_1_start();
 	while(1) 
 	{
-	/***********************************************************************
-	*************************Undersökning av timer_1************************
-	***********************************************************************/
-		//timer_1_start();
-		//_delay_ms(3000);
-		//watch_t = timer_1_get_time();
-	/*====================================================================*/
 		get_acc(current_data);
-		//watch_t = timer_1_get_time();
 	//	get_velocity(current_data);
-	//	watch_t = timer_1_get_time();
 	//	get_gyro(current_data);
-	//	watch_t = timer_1_get_time();
 		get_angle(current_data);
-	//	watch_t = timer_1_get_time();
-		//watch_x = current_data->angle[0];
-		//watch_y = current_data->angle[1];
-	//	watch_z = current_data->angle[2];
 		get_distance(current_data);
-		watch_d = current_data->distance;
 		get_temp(current_data);
 		get_temp_right(current_data);
 		
